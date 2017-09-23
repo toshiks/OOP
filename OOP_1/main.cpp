@@ -6,7 +6,7 @@ int main ()
 {
     IniParser parser;
     try {
-        parser.initial("E:\\CLionProjects\\OOP\\OOP_1\\lab01_input_correct_09.ini");
+        parser.initial("E:\\CLionProjects\\OOP\\OOP\\OOP_1\\lab01_input_correct_09.ini");
         float t = parser.getValue<float>("DEBUG", "PlentySockMaxQSize");
         std::cout << t;
     }

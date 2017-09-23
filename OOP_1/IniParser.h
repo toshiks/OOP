@@ -17,13 +17,6 @@
 #include "Logger.h"
 #include "IniParserException.h"
 
-template < class T >
-constexpr bool isValidType =
-        std::is_same < T, int >::value || std::is_same < T, double >::value ||
-        std::is_same < T, float >::value || std::is_same < T, std::string >::value ||
-        std::is_same < T, char* >::value;
-
-
 class IniParser final
 {
     public:
