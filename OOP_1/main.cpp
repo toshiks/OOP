@@ -1,5 +1,5 @@
 #include <iostream>
-#include "IniParser.h"
+#include "src/IniParser/IniParser.h"
 #include <stack>
 
 int main ()

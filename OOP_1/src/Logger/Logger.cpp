@@ -52,7 +52,7 @@ void Logger::log (Level level, const std::string &message) const
     if (level < this->level)
         return;
 
-    std::string logMessage = this->loggerName + "\n";
+    std::string logMessage = this->loggerName + "::";
 
     switch (level){
         case SEVERE:

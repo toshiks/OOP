@@ -14,8 +14,8 @@
 #include <map>
 #include <typeinfo>
 
-#include "Logger.h"
-#include "IniParserException.h"
+#include "../Logger/Logger.h"
+#include "../IniParserException/IniParserException.h"
 
 class IniParser final
 {

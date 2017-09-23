@@ -4,5 +4,14 @@ project(OOP_1)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS -Wall)
 
-set(SOURCE_FILES main.cpp Logger.cpp Logger.h IniParser.cpp IniParser.h IniParserException.cpp IniParserException.h)
+set(SOURCE_FILES
+        main.cpp
+        src/Logger/Logger.cpp
+        src/Logger/Logger.h
+        src/IniParser/IniParser.cpp
+        src/IniParser/IniParser.h
+        src/IniParserException/IniParserException.cpp
+        src/IniParserException/IniParserException.h)
+
+
 add_executable(OOP_1 ${SOURCE_FILES})

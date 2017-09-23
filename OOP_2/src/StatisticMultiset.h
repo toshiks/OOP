@@ -18,8 +18,8 @@
 #include <memory>
 #include <cxxabi.h>
 
-#include "Logger.h"
-#include "StatisticMultisetException.h"
+#include "Logger/Logger.h"
+#include "StatisticMultisetException/StatisticMultisetException.h"
 
 
 template < class _Tp >
@@ -90,7 +90,7 @@ class StatisticMultiset
 };
 
 template < class _Tp >
-StatisticMultiset < _Tp >::StatisticMultiset () : _loggerMultiset("LOGGER", "E:\\CLionProjects\\OOP\\OOP_2\\logger.txt")
+StatisticMultiset < _Tp >::StatisticMultiset () : _loggerMultiset("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_2\\logger.txt")
 { }
 
 template < class _Tp >

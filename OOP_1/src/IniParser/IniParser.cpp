@@ -13,7 +13,7 @@
 
 #include "IniParser.h"
 
-IniParser::IniParser () : _parserLogger("LOGGER", "E:\\CLionProjects\\OOP\\OOP_1\\logger.txt")
+IniParser::IniParser () : _parserLogger("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_1\\logger.txt")
 { }
 
 IniParser::~IniParser ()
