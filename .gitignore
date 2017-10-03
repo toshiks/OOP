@@ -7,3 +7,10 @@ OOP_2/logger.txt
 OOP_2/.idea
 OOP_2/cmake-build-debug
 OOP_2/cmake-build-release
+OOP_3/logger.txt
+OOP_3/.idea
+OOP_3/cmake-build-debug
+OOP_3/cmake-build-release
+OOP_3/*.wav
+OOP_3/wav_core.cpp
+OOP_3/wav_core.h
