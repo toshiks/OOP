@@ -21,10 +21,18 @@ class Wav
     public:
         Wav();
 
+        void save(const std::string &fileName);
+
         void createFromFile(const std::string &name);
 
+        void convertStereoToMono();
+
+        void makeReverb(double delaySeconds, float decay);
+
+        void printInfo();
+
     private:
-        auto getFile();
+        auto getFile(bool state, const std::string &fileName);
 
         void readHeader();
 
@@ -32,12 +40,19 @@ class Wav
 
         void checkHeader(const long &fileSize) const;
 
+        void preFillHeader();
+
+        void fillHeader(uint_fast16_t countChannels, uint_fast16_t bitsPerSample,
+                        uint_fast32_t sampleRate, uint_fast32_t countSamplesInChannel);
+
+        void dataChecking();
+
         std::unique_ptr<wav_header_s> _header;
         std::string _fileName;
 
         logger::Logger _logger;
 
-        std::vector<std::vector<uint_fast16_t>> _data;
+        std::vector<std::vector<int_fast16_t>> _data;
 
 
 };

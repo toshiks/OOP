@@ -25,6 +25,8 @@ InvalidArgumentException::InvalidArgumentException (const std::string &message) 
 
 InvalidTypeException::InvalidTypeException (const std::string &message) noexcept : WavException(message) { }
 
+WavDataException::WavDataException (const std::string &message) noexcept : WavException(message) { }
+
 WavIOException::WavIOException (const std::string &message) noexcept : WavException(message) { }
 
 WavHeaderException::WavHeaderException (const std::string &message) noexcept : WavIOException(message) { }

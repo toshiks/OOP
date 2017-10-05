@@ -80,6 +80,13 @@ class AudioFormatException : public WavHeaderException
         AudioFormatException (const std::string &message) noexcept;
 };
 
+class WavDataException : public WavException
+{
+    public:
+        WavDataException (const std::string &message) noexcept;
+};
+
+
 
 
 #endif
