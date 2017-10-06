@@ -15,6 +15,12 @@
 Wav::Wav () : _header(nullptr), _logger("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_3\\logger.txt")
 { }
 
+/**
+ *
+ * @param state true - read, false - write
+ * @param fileName string of file's name
+ * @return unique_ptr with FILE
+ */
 auto Wav::getFile (bool state, const std::string &fileName)
 {
     //For auto-close file
@@ -112,7 +118,7 @@ void Wav::readData ()
     }
 
     for ( int ch = 0; ch < countChannels; ch++ ) {
-        std::vector < int_fast16_t >& chdata = _data[ ch ];
+        std::deque < int_fast16_t >& chdata = _data[ ch ];
 
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
             chdata[ i ] = samples[ countChannels * i + ch ];
@@ -178,7 +184,7 @@ void Wav::fillHeader (const uint_fast16_t &countChannels, const uint_fast16_t &b
 
     this->preFillHeader();
 
-    const uint_fast32_t fileBytesSize = 44 + countChannels * (bitsPerSample/ sizeof(uint_fast16_t) ) * countSamplesInChannel;
+    const uint_fast32_t fileBytesSize = 44 + countChannels * sizeof(uint_fast16_t) * countSamplesInChannel;
 
     header->sampleRate = sampleRate;
     header->numChannels = countChannels;
@@ -208,7 +214,7 @@ void Wav::save (const std::string &fileName)
     transformData.resize(countChannels * countSamplesInChannel);
 
     for ( uint_fast16_t ch = 0; ch < countChannels; ch++ ) {
-        const std::vector<int_fast16_t>& chdata = _data[ ch ];
+        const std::deque<int_fast16_t>& chdata = _data[ ch ];
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
             transformData[ countChannels * i + ch ] = chdata[ i ];
         }
@@ -253,7 +259,7 @@ void Wav::dataChecking () const
     }
 }
 
-void Wav::makeReverb (const double &delaySeconds, const float &decay)
+void Wav::makeReverb (const double &delaySeconds, const double &decay)
 {
     if (decay <= 0 || delaySeconds <= 0){
         throw InvalidArgumentException("Negate argument!");
@@ -270,10 +276,10 @@ void Wav::makeReverb (const double &delaySeconds, const float &decay)
 
 
     for ( size_t ch = 0; ch < countChannels; ch++ ) {
-        std::vector<float> tmp;
+        std::vector<double> tmp;
         tmp.resize(countSamplesInChannel);
 
-        // Convert signal from short to float
+        // Convert signal from short to double
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
             tmp[ i ] = _data[ ch ][ i ];
         }
@@ -284,14 +290,14 @@ void Wav::makeReverb (const double &delaySeconds, const float &decay)
         }
 
         // Find maximum signal's magnitude
-        float max_magnitude = 0.0f;
+        double max_magnitude = 0.0f;
         for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
             if ( std::abs(tmp[ i ]) > max_magnitude ) {
                 max_magnitude = std::abs(tmp[ i ]);
             }
         }
 
-        const float norm_coef = 30000.0f / max_magnitude;
+        const double norm_coef = 30000.0f / max_magnitude;
         printf( "max_magnitude = %.1f, coef = %.3f\n", max_magnitude, norm_coef );
 
         // Scale back and transform floats to shorts.
@@ -312,11 +318,11 @@ void Wav::convertStereoToMono ()
 
     const size_t &countSamplesInChannel = _data[0].size();
 
-    std::vector<int_fast16_t> newData;
+    std::deque<int_fast16_t> newData;
     newData.resize( countSamplesInChannel );
 
     for (size_t i = 0; i < countSamplesInChannel; i++){
-        newData[i] = (_data[0][i] + _data[1][i]) / static_cast<uint_fast16_t>(2);
+        newData[i] = (_data[0][i] + _data[1][i]) / static_cast<int_fast16_t>(2);
     }
 
     _data[0].clear();
@@ -327,9 +333,58 @@ void Wav::convertStereoToMono ()
     _logger.log(logger::Level::INFO, "End convert stereo to mono");
 }
 
+/**
+ * Cut audio file.
+ *
+ * @param second
+ * @param state false - cut at the beginning, true - cut at the end
+ */
+void Wav::cut (const double &second, bool state)
+{
+    _logger.log(logger::Level::INFO, "Start cut audio in begin. Seconds: " + std::to_string(second));
+
+    this->dataChecking();
+
+    const auto header = _header.get();
+
+    const double numChannels = static_cast<double>(header->numChannels);
+
+    const double byteRate = static_cast<double>(header->byteRate) / numChannels;
+
+    const double trackDuration = (_data[0].size() * sizeof(int_fast16_t)) / byteRate - 1;
+    _logger.log(logger::Level::INFO, "Byte rate: " + std::to_string(byteRate));
+
+    if (trackDuration <= second){
+        throw InvalidArgumentException("Time (" + std::to_string(second) + ") exceeds track length (" + std::to_string(trackDuration + 1) + ")");
+    }
+
+    const uint_fast32_t byteForCut = static_cast<uint_fast32_t>((byteRate * second) / static_cast<double>(sizeof(int_fast16_t)));
+    _logger.log(logger::Level::INFO, "Byte for cut: " + std::to_string(byteForCut));
+
+    for (size_t ch = 0; ch < _data.size(); ch++){
+
+        std::deque<int_fast16_t> &tmp = _data[ch];
+
+        for (uint_fast32_t i = 0; i < byteForCut; i++){
+            if (state) {
+                tmp.pop_back();
+            } else{
+                tmp.pop_front();
+            }
+        }
+    }
+
+    _logger.log(logger::Level::INFO, "End cut audio in begin. Seconds: " + std::to_string(second));
+}
+
 void Wav::cutBegin (const double &second)
 {
-    const auto header = _header.get();
+    this->cut(second, false);
+}
+
+void Wav::cutEnd (const double &second)
+{
+    this->cut(second, true);
 }
 
 void Wav::checkHeader (const long &fileSize) const

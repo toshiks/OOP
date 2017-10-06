@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <bits/unique_ptr.h>
+#include <deque>
 #include "../Logger/Logger.h"
 
 #include "../wav_header.h"
@@ -27,11 +28,13 @@ class Wav
 
         void convertStereoToMono();
 
-        void makeReverb(const double &delaySeconds, const float &decay);
+        void makeReverb(const double &delaySeconds, const double &decay);
 
         void printInfo() const;
 
         void cutBegin(const double &second);
+
+        void cutEnd(const double &second);
 
     private:
         auto getFile(bool state, const std::string &fileName);
@@ -49,12 +52,14 @@ class Wav
 
         void dataChecking() const;
 
+        void cut(const double &second, bool state);
+
         std::unique_ptr<wav_header_s> _header;
         std::string _fileName;
 
         logger::Logger _logger;
 
-        std::vector<std::vector<int_fast16_t>> _data;
+        std::deque<std::deque<int_fast16_t>> _data;
 
 
 };

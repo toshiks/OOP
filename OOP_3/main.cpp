@@ -11,8 +11,9 @@ int main(int argc, char *argv[])
         Wav w;
         w.createFromFile("E:\\CLionProjects\\OOP\\OOP\\OOP_3\\0.Wav");
         w.printInfo();
-        w.makeReverb(6, 0.4);
+        w.cutEnd(47);
         w.save("E:\\CLionProjects\\OOP\\OOP\\OOP_3\\2.Wav");
+        w.printInfo();
     }
     catch (WavException &e){
         std::cerr << e.what();
