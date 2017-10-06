@@ -1,6 +1,5 @@
 /**
  * @file wav.cpp
- * Place for description
  *
  * @author Anton Klochkov (tklochkov@gmail.com)
  * @date 02.10.2017
@@ -305,6 +304,7 @@ void Wav::makeReverb (double delaySeconds, float decay)
 
 void Wav::convertStereoToMono ()
 {
+    _logger.log(logger::Level::INFO, "Start convert stereo to mono");
     dataChecking();
 
     if (_header.get()->numChannels != 2){
@@ -325,6 +325,7 @@ void Wav::convertStereoToMono ()
     _data.clear();
 
     _data.push_back(newData);
+    _logger.log(logger::Level::INFO, "End convert stereo to mono");
 }
 
 void Wav::checkHeader (const long &fileSize) const
