@@ -27,9 +27,11 @@ class Wav
 
         void convertStereoToMono();
 
-        void makeReverb(double delaySeconds, float decay);
+        void makeReverb(const double &delaySeconds, const float &decay);
 
-        void printInfo();
+        void printInfo() const;
+
+        void cutBegin(const double &second);
 
     private:
         auto getFile(bool state, const std::string &fileName);
@@ -42,10 +44,10 @@ class Wav
 
         void preFillHeader();
 
-        void fillHeader(uint_fast16_t countChannels, uint_fast16_t bitsPerSample,
-                        uint_fast32_t sampleRate, uint_fast32_t countSamplesInChannel);
+        void fillHeader(const uint_fast16_t &countChannels,const uint_fast16_t &bitsPerSample,
+                        const uint_fast32_t &sampleRate, const uint_fast32_t &countSamplesInChannel);
 
-        void dataChecking();
+        void dataChecking() const;
 
         std::unique_ptr<wav_header_s> _header;
         std::string _fileName;

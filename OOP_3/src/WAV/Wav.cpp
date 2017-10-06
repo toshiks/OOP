@@ -23,7 +23,7 @@ auto Wav::getFile (bool state, const std::string &fileName)
         _logger.log(logger::Level::INFO, "File closed.");
     };
 
-    std::string resume = (state ? "rb" : "wb");
+    const std::string resume = (state ? "rb" : "wb");
 
     std::unique_ptr < FILE, decltype(deleter) > file(fopen(fileName.c_str(), resume.c_str()), deleter);
 
@@ -61,7 +61,7 @@ void Wav::createFromFile (const std::string &name)
 
 void Wav::readHeader ()
 {
-    auto file = this->getFile(true, _fileName);
+    const auto file = this->getFile(true, _fileName);
 
     size_t countByte = fread(this->_header.get(), sizeof(wav_header_s), 1, file.get());
 
@@ -81,17 +81,17 @@ void Wav::readData ()
         throw AudioFormatException("Only 16-bit samples is supported");
     }
 
-    auto file = getFile(true, _fileName);
+    const auto file = getFile(true, _fileName);
 
     std::vector < int_fast16_t > samples;
 
     fseek(file.get(), 44, SEEK_SET);
 
-    auto header = this->_header.get();
+    const auto header = this->_header.get();
 
-    uint_fast32_t countChannels = header->numChannels;
+    const uint_fast32_t &countChannels = header->numChannels;
 
-    uint_fast32_t countSamplesInChannel = ( header->subchunk2Size / sizeof(uint_fast16_t)) / countChannels;
+    const uint_fast32_t countSamplesInChannel = ( header->subchunk2Size / sizeof(uint_fast16_t)) / countChannels;
 
     samples.resize( countSamplesInChannel * countChannels );
 
@@ -122,9 +122,9 @@ void Wav::readData ()
     _logger.log(logger::Level::INFO, "Data transform end");
 }
 
-void Wav::printInfo ()
+void Wav::printInfo () const
 {
-    auto header = _header.get();
+    const auto header = _header.get();
     std::cout <<  "-------------------------\n";
     std::cout <<  " audioFormat   " <<  header->audioFormat << "\n";
     std::cout <<  " numChannels   " <<  header->numChannels << "\n";
@@ -142,7 +142,7 @@ void Wav::printInfo ()
 void Wav::preFillHeader ()
 {
     _logger.log(logger::Level::INFO, "Pre fill header start");
-    auto header = _header.get();
+    const auto header = _header.get();
 
     header->chunkId = /*0x52494646; */0x46464952;
     header->format  = /*0x57415645;*/ 0x45564157;
@@ -156,8 +156,8 @@ void Wav::preFillHeader ()
     _logger.log(logger::Level::INFO, "Pre fill header end");
 }
 
-void Wav::fillHeader (uint_fast16_t countChannels, uint_fast16_t bitsPerSample,
-                      uint_fast32_t sampleRate, uint_fast32_t countSamplesInChannel)
+void Wav::fillHeader (const uint_fast16_t &countChannels, const uint_fast16_t &bitsPerSample,
+                      const uint_fast32_t &sampleRate, const uint_fast32_t &countSamplesInChannel)
 {
     if (countChannels < 1){
         throw InvalidArgumentException("The number of channels is less than 1.");
@@ -178,7 +178,7 @@ void Wav::fillHeader (uint_fast16_t countChannels, uint_fast16_t bitsPerSample,
 
     this->preFillHeader();
 
-    uint_fast32_t fileBytesSize = 44 + countChannels * (bitsPerSample/ sizeof(uint_fast16_t) ) * countSamplesInChannel;
+    const uint_fast32_t fileBytesSize = 44 + countChannels * (bitsPerSample/ sizeof(uint_fast16_t) ) * countSamplesInChannel;
 
     header->sampleRate = sampleRate;
     header->numChannels = countChannels;
@@ -196,8 +196,8 @@ void Wav::save (const std::string &fileName)
 {
     dataChecking();
 
-    uint_fast16_t countChannels = static_cast<uint_fast16_t>(_data.size());
-    size_t countSamplesInChannel = _data[0].size();
+    const uint_fast16_t countChannels = static_cast<uint_fast16_t>(_data.size());
+    const size_t &countSamplesInChannel = _data[0].size();
 
     _logger.log(logger::Level::INFO, "Start to save wav file");
 
@@ -216,7 +216,6 @@ void Wav::save (const std::string &fileName)
 
     auto file = getFile(false, fileName);
 
-
     fwrite( this->_header.get(), sizeof(wav_header_s), 1, file.get() );
     fwrite( transformData.data(), sizeof(int_fast16_t), transformData.size(), file.get() );
 
@@ -224,9 +223,9 @@ void Wav::save (const std::string &fileName)
     _logger.log(logger::Level::INFO, "End to save wav file");
 }
 
-void Wav::dataChecking ()
+void Wav::dataChecking () const
 {
-    auto header = this->_header.get();
+    const auto header = this->_header.get();
 
     if ( header == nullptr ){
         throw WavHeaderException("Header doesn't exist");
@@ -240,10 +239,10 @@ void Wav::dataChecking ()
         throw  WavDataException("Data is wrong");
     }
 
-    uint_fast16_t countChannels = static_cast<uint_fast16_t>(_data.size());
-    size_t countSamplesInChannel = _data[0].size();
+    const size_t countChannels = _data.size();
+    const size_t countSamplesInChannel = _data[0].size();
 
-    for (uint_fast16_t i = 1; i < countChannels; i++){
+    for (size_t i = 1; i < countChannels; i++){
         if ( _data[i].size() != countSamplesInChannel ){
             throw  WavDataException("Data is wrong");
         }
@@ -254,7 +253,7 @@ void Wav::dataChecking ()
     }
 }
 
-void Wav::makeReverb (double delaySeconds, float decay)
+void Wav::makeReverb (const double &delaySeconds, const float &decay)
 {
     if (decay <= 0 || delaySeconds <= 0){
         throw InvalidArgumentException("Negate argument!");
@@ -262,12 +261,12 @@ void Wav::makeReverb (double delaySeconds, float decay)
 
     this->dataChecking();
 
-    size_t countChannels = _data.size();
-    size_t countSamplesInChannel = _data[0].size();
+    const size_t &countChannels = _data.size();
+    const size_t countSamplesInChannel = static_cast<int>(_data[0].size());
 
-    auto header = _header.get();
+    const auto header = _header.get();
 
-    int delay_samples = (int)(delaySeconds * header->sampleRate);
+    const int delay_samples = (int)(delaySeconds * header->sampleRate);
 
 
     for ( size_t ch = 0; ch < countChannels; ch++ ) {
@@ -280,24 +279,24 @@ void Wav::makeReverb (double delaySeconds, float decay)
         }
 
         // Add a reverb
-        for ( size_t i = 0; i < static_cast<int>(countSamplesInChannel) - delay_samples; i++ ) {
+        for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
             tmp[ i + delay_samples ] += decay * tmp[ i ];
         }
 
         // Find maximum signal's magnitude
         float max_magnitude = 0.0f;
-        for ( size_t i = 0; i < static_cast<int>(countSamplesInChannel) - delay_samples; i++ ) {
+        for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
             if ( std::abs(tmp[ i ]) > max_magnitude ) {
                 max_magnitude = std::abs(tmp[ i ]);
             }
         }
 
-        float norm_coef = 30000.0f / max_magnitude;
+        const float norm_coef = 30000.0f / max_magnitude;
         printf( "max_magnitude = %.1f, coef = %.3f\n", max_magnitude, norm_coef );
 
         // Scale back and transform floats to shorts.
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
-            _data[ ch ][ i ] = (short)(norm_coef * tmp[ i ]);
+            _data[ ch ][ i ] = static_cast<int_fast16_t>(norm_coef * tmp[ i ]);
         }
     }
 }
@@ -311,12 +310,12 @@ void Wav::convertStereoToMono ()
         throw InvalidArgumentException("The number of channels isn't 2.");
     }
 
-    uint_fast32_t countSamplesInChannel = _data[0].size();
+    const size_t &countSamplesInChannel = _data[0].size();
 
     std::vector<int_fast16_t> newData;
     newData.resize( countSamplesInChannel );
 
-    for (uint_fast32_t i = 0; i < countSamplesInChannel; i++){
+    for (size_t i = 0; i < countSamplesInChannel; i++){
         newData[i] = (_data[0][i] + _data[1][i]) / static_cast<uint_fast16_t>(2);
     }
 
@@ -328,9 +327,14 @@ void Wav::convertStereoToMono ()
     _logger.log(logger::Level::INFO, "End convert stereo to mono");
 }
 
+void Wav::cutBegin (const double &second)
+{
+    const auto header = _header.get();
+}
+
 void Wav::checkHeader (const long &fileSize) const
 {
-    auto header = this->_header.get();
+    const auto header = this->_header.get();
     if ( header->chunkId != 0x46464952 ) {
         throw HeaderSymbolsException("'RIFF' doesn't exist");
     }
