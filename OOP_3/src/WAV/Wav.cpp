@@ -91,7 +91,9 @@ void Wav::readData ()
 
     std::vector < int_fast16_t > samples;
 
-    fseek(file.get(), 44, SEEK_SET);
+    if ( !fseek(file.get(), 44, SEEK_SET) ){
+        throw WavDataException("Wav data isn't valid");
+    }
 
     const auto header = this->_header.get();
 
@@ -290,7 +292,7 @@ void Wav::dataChecking () const
     }
 }
 
-void Wav::makeReverb (const double &delaySeconds, const double &decay)
+void Wav::makeReverb (const float &delaySeconds, const float &decay)
 {
     if ( decay <= 0 || delaySeconds <= 0 ) {
         throw InvalidArgumentException("Negate argument!");
@@ -307,11 +309,11 @@ void Wav::makeReverb (const double &delaySeconds, const double &decay)
 
 
     for ( size_t ch = 0; ch < countChannels; ch++ ) {
-        std::vector < double > tmp;
+        std::vector < float > tmp;
         tmp.resize(countSamplesInChannel);
 
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
-            tmp[ i ] = static_cast<double>(_data[ ch ][ i ]);
+            tmp[ i ] = static_cast<float>(_data[ ch ][ i ]);
         }
 
         for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
@@ -319,7 +321,7 @@ void Wav::makeReverb (const double &delaySeconds, const double &decay)
         }
 
         // Find maximum signal's magnitude
-        double max_magnitude = 0.0f;
+        float max_magnitude = 0.0f;
 
         for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
             if ( std::abs(tmp[ i ]) > max_magnitude ) {
@@ -327,7 +329,7 @@ void Wav::makeReverb (const double &delaySeconds, const double &decay)
             }
         }
 
-        const double norm_coef = 30000.0f / max_magnitude;
+        const float norm_coef = 30000.0f / max_magnitude;
         printf("max_magnitude = %.1f, coef = %.3f\n", max_magnitude, norm_coef);
 
         // Scale back and transform floats to shorts.
@@ -363,12 +365,12 @@ void Wav::convertStereoToMono ()
     _logger.log(logger::Level::INFO, "End convert stereo to mono");
 }
 
-void Wav::cutBegin (const double &second)
+void Wav::cutBegin (const float &second)
 {
     this->cut(second, false);
 }
 
-void Wav::cutEnd (const double &second)
+void Wav::cutEnd (const float &second)
 {
     this->cut(second, true);
 }
@@ -379,7 +381,7 @@ void Wav::cutEnd (const double &second)
  * @param second
  * @param state false - cut at the beginning, true - cut at the end
  */
-void Wav::cut (const double &second, bool state)
+void Wav::cut (const float &second, bool state)
 {
     _logger.log(logger::Level::INFO, "Start cut audio. Seconds: " + std::to_string(second));
 
@@ -387,11 +389,11 @@ void Wav::cut (const double &second, bool state)
 
     const auto header = _header.get();
 
-    const double numChannels = static_cast<double>(header->numChannels);
+    const float numChannels = static_cast<float>(header->numChannels);
 
-    const double byteRate = static_cast<double>(header->byteRate) / numChannels;
+    const float byteRate = static_cast<float>(header->byteRate) / numChannels;
 
-    const double trackDuration = ( _data[ 0 ].size() * sizeof(int_fast16_t)) / byteRate - 1;
+    const float trackDuration = ( _data[ 0 ].size() * sizeof(int_fast16_t)) / byteRate - 1;
     _logger.log(logger::Level::INFO, "Byte rate: " + std::to_string(byteRate));
 
     if ( trackDuration <= second ) {
@@ -401,7 +403,7 @@ void Wav::cut (const double &second, bool state)
     }
 
     const uint_fast32_t byteForCut = static_cast<uint_fast32_t>(( byteRate * second ) /
-                                                                static_cast<double>(sizeof(int_fast16_t)));
+                                                                static_cast<float>(sizeof(int_fast16_t)));
     _logger.log(logger::Level::INFO, "Byte for cut: " + std::to_string(byteForCut));
 
     for ( size_t ch = 0; ch < _data.size(); ch++ ) {

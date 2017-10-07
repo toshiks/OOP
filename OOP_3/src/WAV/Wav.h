@@ -27,12 +27,12 @@ class Wav
 
         void save (const std::string &fileName);
 
-        void makeReverb (const double &delaySeconds, const double &decay);
+        void makeReverb (const float &delaySeconds, const float &decay);
 
         void convertStereoToMono ();
 
-        void cutBegin (const double &second);
-        void cutEnd   (const double &second);
+        void cutBegin (const float &second);
+        void cutEnd   (const float &second);
 
         std::string   getInfo          () const;
         uint_fast16_t getNumChannels   () const;
@@ -55,7 +55,7 @@ class Wav
 
         void dataChecking () const;
 
-        void cut (const double &second, bool state);
+        void cut (const float &second, bool state);
 
         std::unique_ptr < WavHeader_s > _header;
 
