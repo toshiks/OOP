@@ -91,7 +91,7 @@ void Wav::readData ()
 
     std::vector < int_fast16_t > samples;
 
-    if ( !fseek(file.get(), 44, SEEK_SET) ){
+    if ( fseek(file.get(), 44, SEEK_SET) ){
         throw WavDataException("Wav data isn't valid");
     }
 
@@ -192,7 +192,9 @@ void Wav::save (const std::string &fileName)
     transformData.resize(countChannels * countSamplesInChannel);
 
     for ( uint_fast16_t ch = 0; ch < countChannels; ch++ ) {
+
         const std::deque < int_fast16_t > &chdata = _data[ ch ];
+
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
             transformData[ countChannels * i + ch ] = chdata[ i ];
         }

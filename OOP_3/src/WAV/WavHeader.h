@@ -1,6 +1,7 @@
 #ifndef WAV_HEADER_H
 #define WAV_HEADER_H
 
+#pragma pack(push, 1)
 struct WavHeader_s
 {
     uint_fast32_t chunkId;
@@ -17,5 +18,6 @@ struct WavHeader_s
     uint_fast32_t subchunk2Id;
     uint_fast32_t subchunk2Size;
 };
+#pragma pack(pop)
 
 #endif // WAV_HEADER_H
