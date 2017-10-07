@@ -8,6 +8,8 @@
  */
 
 #include <cmath>
+#include <fstream>
+#include <iostream>
 
 #include "Wav.h"
 #include "../WavException/WavException.h"
@@ -24,17 +26,20 @@ Wav::Wav () : _header(nullptr), _logger("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\
 auto Wav::getFile (bool state, const std::string &fileName)
 {
     //For auto-close file
-    auto deleter = [ & ] (FILE* f) {
-        fclose(f);
+    auto deleter = [ & ] (std::fstream* f) {
+        f->close();
         _logger.log(logger::Level::INFO, "File closed.");
     };
 
-    const std::string resume = ( state ? "rb" : "wb" );
+    const std::fstream::openmode resume = ( state ?  std::fstream::in :  std::fstream::out )
+                                          | std::fstream::binary | std::fstream::ate;
 
-    std::unique_ptr < FILE, decltype(deleter) > file(fopen(fileName.c_str(), resume.c_str()), deleter);
+    std::unique_ptr < std::fstream, decltype(deleter) > file(
+             new std::fstream(fileName.c_str(),  resume),
+             deleter);
 
     if ( state ) {
-        if ( !file.get()) {
+        if ( !file.get()->is_open() ) {
             throw FileDoesNotExistException("File " + fileName + " is not exist");
         }
     }
@@ -67,18 +72,19 @@ void Wav::createFromFile (const std::string &name)
 
 void Wav::readHeader ()
 {
-    const auto file = this->getFile(true, _fileName);
+    const auto file = getFile(true, _fileName);
 
-    size_t countByte = fread(this->_header.get(), sizeof(WavHeader_s), 1, file.get());
+    file.get()->seekg(0, std::fstream::beg);
+    size_t countByte = static_cast<size_t>(file.get()->read(reinterpret_cast<char *>(&(*this->_header.get())),
+                                                            sizeof(WavHeader_s)).gcount());
 
-    if ( countByte != 1 ) {
+    if ( countByte != 44 ) {
         throw FileFormatException("File " + this->_fileName + " isn't read.");
     }
 
-    fseek(file.get(), 0, SEEK_END); // seek to the end of the file
-    long fileSize = ftell(file.get());
+    file.get()->seekg (0, std::fstream::end);
 
-    checkHeader(fileSize);
+    checkHeader(static_cast<const long>(file.get()->tellg()));
 }
 
 void Wav::readData ()
@@ -91,7 +97,10 @@ void Wav::readData ()
 
     std::vector < int_fast16_t > samples;
 
-    if ( fseek(file.get(), 44, SEEK_SET) ){
+    try {
+        file.get()->seekg(44, std::fstream::beg);
+    }
+    catch (...){
         throw WavDataException("Wav data isn't valid");
     }
 
@@ -102,7 +111,8 @@ void Wav::readData ()
 
     samples.resize(countSamplesInChannel * countChannels);
 
-    size_t readBytes = fread(samples.data(), 1, header->subchunk2Size, file.get());
+    uint_fast32_t readBytes = static_cast<uint_fast32_t>(file.get()->read(reinterpret_cast<char *>(samples.data()),
+                                                                          header->subchunk2Size).gcount());
 
     if ( readBytes != _header.get()->subchunk2Size ) {
         throw WavIOException("readData() read only " + std::to_string(readBytes) +
@@ -202,8 +212,8 @@ void Wav::save (const std::string &fileName)
 
     auto file = getFile(false, fileName);
 
-    fwrite(this->_header.get(), sizeof(WavHeader_s), 1, file.get());
-    fwrite(transformData.data(), sizeof(int_fast16_t), transformData.size(), file.get());
+    file.get()->write(reinterpret_cast<char *>(this->_header.get()), sizeof(WavHeader_s));
+    file.get()->write(reinterpret_cast<char *>(transformData.data()), sizeof(int_fast16_t) * transformData.size());
 
     _logger.log(logger::Level::INFO, "Transform data size: " + std::to_string(transformData.size()));
     _logger.log(logger::Level::INFO, "End to save wav file");
