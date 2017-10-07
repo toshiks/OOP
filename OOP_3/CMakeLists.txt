@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
 set(SOURCE_FILES
         main.cpp
-        src/wav_header.h
+        src/WAV/WavHeader.h
         src/WAV/Wav.cpp
         src/WAV/Wav.h
         src/WavException/WavException.cpp

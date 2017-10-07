@@ -1,7 +1,7 @@
 #ifndef WAV_HEADER_H
 #define WAV_HEADER_H
 
-struct wav_header_s
+struct WavHeader_s
 {
     uint_fast32_t chunkId;
     uint_fast32_t chunkSize;
