@@ -14,14 +14,14 @@ namespace logger
 {
     // Levels of log message
     enum Level{
-        // Low level
+        // Low level_
         SEVERE,
         WARNING,
         INFO,
         CONFIG,
         FINE,
         FINER,
-        // Hard level
+        // Hard level_
         FINEST
     };
 
@@ -36,18 +36,18 @@ namespace logger
             void setLevel(Level level);
             void setFileName (const std::string &fileName);
 
-            // Write log message in file
+            // Write log message in file_
             void log(Level level, const std::string &message) const;
 
         protected:
-            // Open file
+            // Open file_
             void openFile(const std::string &fileName);
 
         private:
             // Level for
-            Level level;
-            std::string loggerName;
-            mutable std::ofstream file;
+            Level level_;
+            std::string loggerName_;
+            mutable std::ofstream file_;
     };
 
 }

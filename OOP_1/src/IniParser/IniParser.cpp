@@ -13,7 +13,7 @@
 
 #include "IniParser.h"
 
-IniParser::IniParser () : _parserLogger("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_1\\logger.txt")
+IniParser::IniParser () : parserLogger_("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_1\\logger.txt")
 { }
 
 IniParser::~IniParser ()
@@ -26,22 +26,22 @@ void IniParser::initial (const std::string &fileName) const noexcept(false)
     if ( !in.is_open() || !in.good()) {
         std::string message = "File: '" + fileName + "' doesn't exist!\n";
 
-        _parserLogger.log(logger::Level::FINEST, message);
+        parserLogger_.log(logger::Level::FINEST, message);
         throw FileDoesNotExistException(message);
     }
 
-    _parserLogger.log(logger::Level::INFO, "File: '" + fileName + "' opened.\n");
+    parserLogger_.log(logger::Level::INFO, "File: '" + fileName + "' opened.\n");
     parseFile(in);
 
     in.close();
-    _parserLogger.log(logger::Level::INFO, "File: '" + fileName + "' closed.\n");
+    parserLogger_.log(logger::Level::INFO, "File: '" + fileName + "' closed.\n");
 }
 
 std::string IniParser::generateStringExceptionMessage(const int &count, std::string type) const
 {
     std::string message = "ERROR IN " + std::to_string(count) + " LINE.\n" + type + " INCORRECT!\n";
 
-    _parserLogger.log(logger::Level::FINE, message);
+    parserLogger_.log(logger::Level::FINE, message);
 
     return message;
 }
@@ -67,7 +67,7 @@ void IniParser::parseFile (std::ifstream &file) const noexcept(false)
 
     while ( !file.eof() && file.good() ) {
         std::getline(file, str, '\n');
-        _parserLogger.log(logger::Level::INFO, "read line: '" + str + "'\n");
+        parserLogger_.log(logger::Level::INFO, "read line: '" + str + "'\n");
         count++;
 
         if ( std::regex_match(str, isComments)) {
@@ -77,19 +77,19 @@ void IniParser::parseFile (std::ifstream &file) const noexcept(false)
 
             if ( !currentSectionParam.empty()) {
 
-                this->_data.insert(make_pair(currentSectionName, currentSectionParam));
+                this->data_.insert(make_pair(currentSectionName, currentSectionParam));
                 currentSectionParam.clear();
             }
 
             currentSectionName = temp[ 1 ];
 
-            _parserLogger.log(logger::Level::INFO, "Find section: '" + temp[ 1 ].str() + "'\n");
+            parserLogger_.log(logger::Level::INFO, "Find section: '" + temp[ 1 ].str() + "'\n");
 
         } else if ( std::regex_match(str, temp, isRightParameter)) {
 
             currentSectionParam.insert(make_pair(temp[ 1 ], temp[ 2 ]));
 
-            _parserLogger.log(logger::Level::INFO,
+            parserLogger_.log(logger::Level::INFO,
                              "Find pair: '" + temp[ 1 ].str() + "' and '" + temp[ 2 ].str() + "'\n");
 
         } else if ( std::regex_match(str, isAllSection)) {
@@ -111,7 +111,7 @@ void IniParser::parseFile (std::ifstream &file) const noexcept(false)
 
     if ( !currentSectionParam.empty()) {
 
-        this->_data.insert(make_pair(currentSectionName, currentSectionParam));
+        this->data_.insert(make_pair(currentSectionName, currentSectionParam));
         currentSectionParam.clear();
     }
 }
@@ -133,7 +133,7 @@ bool IniParser::isHaveSection (const std::string &sectionName) const
 {
     isRightWord(sectionName);
 
-    return this->_data.find(sectionName) != this->_data.end();
+    return this->data_.find(sectionName) != this->data_.end();
 }
 
 bool IniParser::isHaveParam (const std::string &sectionName, const std::string &paramName) const
@@ -144,7 +144,7 @@ bool IniParser::isHaveParam (const std::string &sectionName, const std::string &
 
     isRightWord(paramName);
 
-    std::multimap<std::string, std::string> &temp = this->_data.find(sectionName)->second;
+    std::multimap<std::string, std::string> &temp = this->data_.find(sectionName)->second;
 
     return temp.find(paramName) != temp.end();
 }
@@ -155,7 +155,7 @@ std::string IniParser::getStr (const std::string &sectionName, const std::string
         throw InvalidArgumentException("Section '" + sectionName + "' and parameter '" + paramName + "' not found!");
     }
 
-    std::string str = this->_data.find(sectionName)->second.find(paramName)->second;
+    std::string str = this->data_.find(sectionName)->second.find(paramName)->second;
 
     int countPointer = 0;
     bool flag = false;

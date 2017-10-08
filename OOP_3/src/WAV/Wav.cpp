@@ -14,7 +14,7 @@
 #include "Wav.h"
 #include "../WavException/WavException.h"
 
-Wav::Wav () : _header(nullptr), _logger("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_3\\logger.txt")
+Wav::Wav () : header_(nullptr), logger_("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\OOP_3\\logger.txt")
 { }
 
 /**
@@ -25,10 +25,10 @@ Wav::Wav () : _header(nullptr), _logger("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\
  */
 auto Wav::getFile (bool state, const std::string &fileName)
 {
-    //For auto-close file
+    //For auto-close file_
     auto deleter = [ & ] (std::fstream* f) {
         f->close();
-        _logger.log(logger::Level::INFO, "File closed.");
+        logger_.log(logger::Level::INFO, "File closed.");
     };
 
     const std::fstream::openmode resume = ( state ?  std::fstream::in :  std::fstream::out )
@@ -44,42 +44,42 @@ auto Wav::getFile (bool state, const std::string &fileName)
         }
     }
 
-    this->_logger.log(logger::Level::INFO, "Open file " + fileName);
+    this->logger_.log(logger::Level::INFO, "Open file_ " + fileName);
 
     return file;
 }
 
 void Wav::createFromFile (const std::string &name)
 {
-    this->_logger.log(logger::Level::INFO, ">>>> Read of file ( " + name + " )");
-    this->_fileName = name;
+    this->logger_.log(logger::Level::INFO, ">>>> Read of file_ ( " + name + " )");
+    this->fileName_ = name;
 
-    if ( this->_header.get() != nullptr ) {
-        this->_header.release();
+    if ( this->header_.get() != nullptr ) {
+        this->header_.release();
     }
 
-    this->_header = std::make_unique < WavHeader_s >();
+    this->header_ = std::make_unique < WavHeader_s >();
 
-    this->_logger.log(logger::Level::INFO, "Read header.");
+    this->logger_.log(logger::Level::INFO, "Read header.");
     readHeader();
-    this->_logger.log(logger::Level::INFO, "The header has been read.");
+    this->logger_.log(logger::Level::INFO, "The header has been read.");
 
 
-    this->_logger.log(logger::Level::INFO, "Read data.");
+    this->logger_.log(logger::Level::INFO, "Read data.");
     readData();
-    this->_logger.log(logger::Level::INFO, "The data has been read.");
+    this->logger_.log(logger::Level::INFO, "The data has been read.");
 }
 
 void Wav::readHeader ()
 {
-    const auto file = getFile(true, _fileName);
+    const auto file = getFile(true, fileName_);
 
     file.get()->seekg(0, std::fstream::beg);
-    size_t countByte = static_cast<size_t>(file.get()->read(reinterpret_cast<char *>(&(*this->_header.get())),
+    size_t countByte = static_cast<size_t>(file.get()->read(reinterpret_cast<char *>(&(*this->header_.get())),
                                                             sizeof(WavHeader_s)).gcount());
 
     if ( countByte != 44 ) {
-        throw FileFormatException("File " + this->_fileName + " isn't read.");
+        throw FileFormatException("File " + this->fileName_ + " isn't read.");
     }
 
     file.get()->seekg (0, std::fstream::end);
@@ -89,11 +89,11 @@ void Wav::readHeader ()
 
 void Wav::readData ()
 {
-    if ( this->_header->bitsPerSample != 16 ) {
+    if ( this->header_->bitsPerSample != 16 ) {
         throw AudioFormatException("Only 16-bit samples is supported");
     }
 
-    const auto file = getFile(true, _fileName);
+    const auto file = getFile(true, fileName_);
 
     std::vector < int_fast16_t > samples;
 
@@ -104,7 +104,7 @@ void Wav::readData ()
         throw WavDataException("Wav data isn't valid");
     }
 
-    const auto header = this->_header.get();
+    const auto header = this->header_.get();
 
     const uint_fast32_t &countChannels        = header->numChannels;
     const uint_fast32_t countSamplesInChannel = ( header->subchunk2Size / sizeof(uint_fast16_t)) / countChannels;
@@ -114,34 +114,34 @@ void Wav::readData ()
     uint_fast32_t readBytes = static_cast<uint_fast32_t>(file.get()->read(reinterpret_cast<char *>(samples.data()),
                                                                           header->subchunk2Size).gcount());
 
-    if ( readBytes != _header.get()->subchunk2Size ) {
+    if ( readBytes != header_.get()->subchunk2Size ) {
         throw WavIOException("readData() read only " + std::to_string(readBytes) +
-                             " of " + std::to_string(_header.get()->subchunk2Size));
+                             " of " + std::to_string(header_.get()->subchunk2Size));
     }
 
-    _logger.log(logger::Level::INFO, "Data size: " + std::to_string(samples.size()));
-    _logger.log(logger::Level::INFO, "Data transform start");
+    logger_.log(logger::Level::INFO, "Data size: " + std::to_string(samples.size()));
+    logger_.log(logger::Level::INFO, "Data transform start");
 
-    _data.resize(countChannels);
+    data_.resize(countChannels);
 
-    for ( size_t i = 0; i < _data.size(); i++ ) {
-        _data[ i ].resize(countSamplesInChannel);
+    for ( size_t i = 0; i < data_.size(); i++ ) {
+        data_[ i ].resize(countSamplesInChannel);
     }
 
     for ( int ch = 0; ch < countChannels; ch++ ) {
-        std::deque < int_fast16_t > &chdata = _data[ ch ];
+        std::deque < int_fast16_t > &chdata = data_[ ch ];
 
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
             chdata[ i ] = samples[ countChannels * i + ch ];
         }
     }
 
-    _logger.log(logger::Level::INFO, "Data transform end");
+    logger_.log(logger::Level::INFO, "Data transform end");
 }
 
 void Wav::checkHeader (const long &fileSize) const
 {
-    const auto header = this->_header.get();
+    const auto header = this->header_.get();
 
     if ( header->chunkId != 0x46464952 ) {
         throw HeaderSymbolsException("'RIFF' doesn't exist");
@@ -190,12 +190,12 @@ void Wav::save (const std::string &fileName)
 {
     dataChecking();
 
-    const uint_fast16_t countChannels = static_cast<uint_fast16_t>(_data.size());
-    const size_t &countSamplesInChannel = _data[ 0 ].size();
+    const uint_fast16_t countChannels = static_cast<uint_fast16_t>(data_.size());
+    const size_t &countSamplesInChannel = data_[ 0 ].size();
 
-    _logger.log(logger::Level::INFO, "Start to save wav file");
+    logger_.log(logger::Level::INFO, "Start to save wav file_");
 
-    this->fillHeader(countChannels, 16, _header.get()->sampleRate, countSamplesInChannel);
+    this->fillHeader(countChannels, 16, header_.get()->sampleRate, countSamplesInChannel);
 
     std::vector < int_fast16_t > transformData;
 
@@ -203,7 +203,7 @@ void Wav::save (const std::string &fileName)
 
     for ( uint_fast16_t ch = 0; ch < countChannels; ch++ ) {
 
-        const std::deque < int_fast16_t > &chdata = _data[ ch ];
+        const std::deque < int_fast16_t > &chdata = data_[ ch ];
 
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
             transformData[ countChannels * i + ch ] = chdata[ i ];
@@ -212,18 +212,18 @@ void Wav::save (const std::string &fileName)
 
     auto file = getFile(false, fileName);
 
-    file.get()->write(reinterpret_cast<char *>(this->_header.get()), sizeof(WavHeader_s));
+    file.get()->write(reinterpret_cast<char *>(this->header_.get()), sizeof(WavHeader_s));
     file.get()->write(reinterpret_cast<char *>(transformData.data()), sizeof(int_fast16_t) * transformData.size());
 
-    _logger.log(logger::Level::INFO, "Transform data size: " + std::to_string(transformData.size()));
-    _logger.log(logger::Level::INFO, "End to save wav file");
+    logger_.log(logger::Level::INFO, "Transform data size: " + std::to_string(transformData.size()));
+    logger_.log(logger::Level::INFO, "End to save wav file_");
 }
 
 void Wav::preFillHeader ()
 {
-    _logger.log(logger::Level::INFO, "Pre fill header start");
+    logger_.log(logger::Level::INFO, "Pre fill header start");
 
-    const auto header = _header.get();
+    const auto header = header_.get();
 
     header->chunkId = 0x46464952;
     header->format  = 0x45564157;
@@ -235,7 +235,7 @@ void Wav::preFillHeader ()
     header->subchunk1Size = 16;
     header->bitsPerSample = 16;
 
-    _logger.log(logger::Level::INFO, "Pre fill header end");
+    logger_.log(logger::Level::INFO, "Pre fill header end");
 }
 
 void Wav::fillHeader (const uint_fast16_t &countChannels, const uint_fast16_t &bitsPerSample,
@@ -249,14 +249,14 @@ void Wav::fillHeader (const uint_fast16_t &countChannels, const uint_fast16_t &b
         throw AudioFormatException("Only 16-bit samples is supported");
     }
 
-    _logger.log(logger::Level::INFO, "Fill header start");
+    logger_.log(logger::Level::INFO, "Fill header start");
 
-    if ( _header.get() != nullptr )
-        _header.release();
+    if ( header_.get() != nullptr )
+        header_.release();
 
-    _header = std::make_unique < WavHeader_s >();
+    header_ = std::make_unique < WavHeader_s >();
 
-    auto header = _header.get();
+    auto header = header_.get();
 
     this->preFillHeader();
 
@@ -271,30 +271,30 @@ void Wav::fillHeader (const uint_fast16_t &countChannels, const uint_fast16_t &b
     header->byteRate   = header->sampleRate * header->numChannels * header->bitsPerSample / 8;
     header->blockAlign = header->numChannels * header->bitsPerSample / static_cast<uint_fast16_t>(8);
 
-    _logger.log(logger::Level::INFO, "Fill header end");
+    logger_.log(logger::Level::INFO, "Fill header end");
 }
 
 void Wav::dataChecking () const
 {
-    const auto header = this->_header.get();
+    const auto header = this->header_.get();
 
     if ( header == nullptr ) {
         throw WavHeaderException("Header doesn't exist");
     }
 
-    if ( _data.empty()) {
+    if ( data_.empty()) {
         throw WavDataException("Data don't exist");
     }
 
-    if ( _data[ 0 ].empty()) {
+    if ( data_[ 0 ].empty()) {
         throw WavDataException("Data is wrong");
     }
 
-    const size_t countChannels = _data.size();
-    const size_t countSamplesInChannel = _data[ 0 ].size();
+    const size_t countChannels = data_.size();
+    const size_t countSamplesInChannel = data_[ 0 ].size();
 
     for ( size_t i = 1; i < countChannels; i++ ) {
-        if ( _data[ i ].size() != countSamplesInChannel ) {
+        if ( data_[ i ].size() != countSamplesInChannel ) {
             throw WavDataException("Data is wrong");
         }
     }
@@ -312,10 +312,10 @@ void Wav::makeReverb (const float &delaySeconds, const float &decay)
 
     this->dataChecking();
 
-    const size_t &countChannels        = _data.size();
-    const size_t countSamplesInChannel = static_cast<int>(_data[ 0 ].size());
+    const size_t &countChannels        = data_.size();
+    const size_t countSamplesInChannel = static_cast<int>(data_[ 0 ].size());
 
-    const auto header = _header.get();
+    const auto header = header_.get();
 
     const int delay_samples = ( int ) ( delaySeconds * header->sampleRate );
 
@@ -325,7 +325,7 @@ void Wav::makeReverb (const float &delaySeconds, const float &decay)
         tmp.resize(countSamplesInChannel);
 
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
-            tmp[ i ] = static_cast<float>(_data[ ch ][ i ]);
+            tmp[ i ] = static_cast<float>(data_[ ch ][ i ]);
         }
 
         for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
@@ -346,35 +346,35 @@ void Wav::makeReverb (const float &delaySeconds, const float &decay)
 
         // Scale back and transform floats to shorts.
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
-            _data[ ch ][ i ] = static_cast<int_fast16_t>(norm_coef * tmp[ i ]);
+            data_[ ch ][ i ] = static_cast<int_fast16_t>(norm_coef * tmp[ i ]);
         }
     }
 }
 
 void Wav::convertStereoToMono ()
 {
-    _logger.log(logger::Level::INFO, "Start convert stereo to mono");
+    logger_.log(logger::Level::INFO, "Start convert stereo to mono");
     dataChecking();
 
-    if ( _header.get()->numChannels != 2 ) {
+    if ( header_.get()->numChannels != 2 ) {
         throw InvalidArgumentException("The number of channels isn't 2.");
     }
 
-    const size_t &countSamplesInChannel = _data[ 0 ].size();
+    const size_t &countSamplesInChannel = data_[ 0 ].size();
 
     std::deque < int_fast16_t > newData;
     newData.resize(countSamplesInChannel);
 
     for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
-        newData[ i ] = ( _data[ 0 ][ i ] + _data[ 1 ][ i ] ) / static_cast<int_fast16_t>(2);
+        newData[ i ] = ( data_[ 0 ][ i ] + data_[ 1 ][ i ] ) / static_cast<int_fast16_t>(2);
     }
 
-    _data[ 0 ].clear();
-    _data[ 1 ].clear();
-    _data.clear();
+    data_[ 0 ].clear();
+    data_[ 1 ].clear();
+    data_.clear();
 
-    _data.push_back(newData);
-    _logger.log(logger::Level::INFO, "End convert stereo to mono");
+    data_.push_back(newData);
+    logger_.log(logger::Level::INFO, "End convert stereo to mono");
 }
 
 void Wav::cutBegin (const float &second)
@@ -395,18 +395,18 @@ void Wav::cutEnd (const float &second)
  */
 void Wav::cut (const float &second, bool state)
 {
-    _logger.log(logger::Level::INFO, "Start cut audio. Seconds: " + std::to_string(second));
+    logger_.log(logger::Level::INFO, "Start cut audio. Seconds: " + std::to_string(second));
 
     this->dataChecking();
 
-    const auto header = _header.get();
+    const auto header = header_.get();
 
     const float numChannels = static_cast<float>(header->numChannels);
 
     const float byteRate = static_cast<float>(header->byteRate) / numChannels;
 
-    const float trackDuration = ( _data[ 0 ].size() * sizeof(int_fast16_t)) / byteRate - 1;
-    _logger.log(logger::Level::INFO, "Byte rate: " + std::to_string(byteRate));
+    const float trackDuration = ( data_[ 0 ].size() * sizeof(int_fast16_t)) / byteRate - 1;
+    logger_.log(logger::Level::INFO, "Byte rate: " + std::to_string(byteRate));
 
     if ( trackDuration <= second ) {
         throw InvalidArgumentException(
@@ -416,11 +416,11 @@ void Wav::cut (const float &second, bool state)
 
     const uint_fast32_t byteForCut = static_cast<uint_fast32_t>(( byteRate * second ) /
                                                                 static_cast<float>(sizeof(int_fast16_t)));
-    _logger.log(logger::Level::INFO, "Byte for cut: " + std::to_string(byteForCut));
+    logger_.log(logger::Level::INFO, "Byte for cut: " + std::to_string(byteForCut));
 
-    for ( size_t ch = 0; ch < _data.size(); ch++ ) {
+    for ( size_t ch = 0; ch < data_.size(); ch++ ) {
 
-        std::deque < int_fast16_t > &tmp = _data[ ch ];
+        std::deque < int_fast16_t > &tmp = data_[ ch ];
 
         for ( uint_fast32_t i = 0; i < byteForCut; i++ ) {
             if ( state ) {
@@ -431,12 +431,12 @@ void Wav::cut (const float &second, bool state)
         }
     }
 
-    _logger.log(logger::Level::INFO, "End cut audio. Seconds: " + std::to_string(second));
+    logger_.log(logger::Level::INFO, "End cut audio. Seconds: " + std::to_string(second));
 }
 
 std::string Wav::getInfo () const
 {
-    const auto header = _header.get();
+    const auto header = header_.get();
 
     std::string info;
 
@@ -458,26 +458,26 @@ uint_fast16_t Wav::getNumChannels () const
 {
     dataChecking();
 
-    return this->_header.get()->numChannels;
+    return this->header_.get()->numChannels;
 }
 
 uint_fast32_t Wav::getSampleRate () const
 {
     dataChecking();
 
-    return this->_header.get()->sampleRate;
+    return this->header_.get()->sampleRate;
 }
 
 uint_fast32_t Wav::getByteRate () const
 {
     dataChecking();
 
-    return this->_header.get()->byteRate;
+    return this->header_.get()->byteRate;
 }
 
 uint_fast16_t Wav::getBitsPerSample () const
 {
     dataChecking();
 
-    return this->_header.get()->bitsPerSample;
+    return this->header_.get()->bitsPerSample;
 }

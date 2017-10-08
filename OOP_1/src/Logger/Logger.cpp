@@ -9,16 +9,16 @@
 #include <iostream>
 using namespace logger;
 
-Logger::Logger (std::string loggerName, std::string fileName, Level level) : level(level),
-                                                                             loggerName(loggerName),
-                                                                             file(fileName) { }
+Logger::Logger (std::string loggerName, std::string fileName, Level level) : level_(level),
+                                                                             loggerName_(loggerName),
+                                                                             file_(fileName) { }
 
 Logger::Logger (std::string loggerName, std::string fileName): Logger(loggerName, fileName, Level::SEVERE) { }
 
 Logger::~Logger ()
 {
     try {
-        this->file.close();
+        this->file_.close();
     }
     catch (...)
     { }
@@ -26,7 +26,7 @@ Logger::~Logger ()
 
 void Logger::setLevel (Level level)
 {
-    this->level = level;
+    this->level_ = level;
 }
 
 void Logger::setFileName (const std::string &fileName)
@@ -36,23 +36,23 @@ void Logger::setFileName (const std::string &fileName)
 
 void Logger::openFile (const std::string &fileName)
 {
-    if (this->file.is_open())
-        this->file.close();
+    if (this->file_.is_open())
+        this->file_.close();
 
     try{
-        this->file.open(fileName);
+        this->file_.open(fileName);
     }
     catch (std::ifstream::failure e){
-        std::cerr << "Exception error in logger '" << loggerName << "'\nMessage: " << e.what();
+        std::cerr << "Exception error in logger '" << loggerName_ << "'\nMessage: " << e.what();
     }
 }
 
 void Logger::log (Level level, const std::string &message) const
 {
-    if (level < this->level)
+    if (level < this->level_)
         return;
 
-    std::string logMessage = this->loggerName + "::";
+    std::string logMessage = this->loggerName_ + "::";
 
     switch (level){
         case SEVERE:
@@ -80,5 +80,5 @@ void Logger::log (Level level, const std::string &message) const
 
     logMessage += message;
 
-    this->file << logMessage;
+    this->file_ << logMessage;
 }

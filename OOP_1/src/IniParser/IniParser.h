@@ -24,7 +24,7 @@ class IniParser final
 
         ~IniParser ();
 
-        //Open ini file and parse it
+        //Open ini file_ and parse it
         void initial (const std::string &fileName) const noexcept(false);
 
         // Check section name
@@ -34,26 +34,27 @@ class IniParser final
         bool isHaveParam (const std::string &sectionName, const std::string &paramName) const noexcept(false);
 
         // Return value of parameter from section
-        template < class _Tp >
-        _Tp getValue (const std::string &sectionName, const std::string &paramName) const noexcept(false);
+        template < class Tp_ >
+        Tp_ getValue (const std::string &sectionName, const std::string &paramName) const noexcept(false);
 
 
     protected:
-        // Parsing file
+        // Parsing file_
         void parseFile (std::ifstream &file) const noexcept(false);
 
         // Check word
         bool isRightWord (const std::string &word) const noexcept(false);
 
 
-
     private:
-        std::string generateStringExceptionMessage(const int &count, std::string type) const;
+        std::string generateStringExceptionMessage (const int &count, std::string type) const;
 
-        std::string getStr(const std::string &sectionName, const std::string &paramName, bool isNumber, const char * typeName) const noexcept(false);
+        std::string getStr (const std::string &sectionName, const std::string &paramName, bool isNumber,
+                            const char* typeName) const noexcept(false);
 
-        mutable std::multimap < std::string, std::multimap < std::string, std::string > > _data;
-        mutable logger::Logger _parserLogger;
+        mutable std::multimap < std::string, std::multimap < std::string, std::string > > data_;
+        mutable logger::Logger parserLogger_;
 
 };
+
 #endif //OOP_1_INIPARSER_H

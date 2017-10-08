@@ -57,13 +57,13 @@ class Wav
 
         void cut (const float &second, bool state);
 
-        std::unique_ptr < WavHeader_s > _header;
+        std::unique_ptr < WavHeader_s > header_;
 
-        std::string _fileName;
+        std::string fileName_;
 
-        logger::Logger _logger;
+        logger::Logger logger_;
 
-        std::deque < std::deque < int_fast16_t>> _data;
+        std::deque < std::deque < int_fast16_t>> data_;
 
 
 };
