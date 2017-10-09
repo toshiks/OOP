@@ -13,7 +13,7 @@
 
 namespace logger
 {
-    // Levels of log message
+    // Levels of log message_
     enum Level{
         // Low level_
         SEVERE,
@@ -37,7 +37,7 @@ namespace logger
             void setLevel(Level level);
             void setFileName (const std::string &fileName);
 
-            // Write log message in file_
+            // Write log message_ in file_
             void log(Level level, const std::string &message) const;
 
         protected:

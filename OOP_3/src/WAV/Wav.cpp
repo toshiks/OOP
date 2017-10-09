@@ -28,18 +28,19 @@ auto Wav::getFile (bool state, const std::string &fileName)
     //For auto-close file_
     auto deleter = [ & ] (std::fstream* f) {
         f->close();
+        delete f;
         logger_.log(logger::Level::INFO, "File closed.");
     };
 
-    const std::fstream::openmode resume = ( state ?  std::fstream::in :  std::fstream::out )
+    const std::fstream::openmode resume = ( state ? std::fstream::in : std::fstream::out )
                                           | std::fstream::binary | std::fstream::ate;
 
     std::unique_ptr < std::fstream, decltype(deleter) > file(
-             new std::fstream(fileName.c_str(),  resume),
-             deleter);
+            new std::fstream(fileName.c_str(), resume),
+            deleter);
 
     if ( state ) {
-        if ( !file.get()->is_open() ) {
+        if ( !file.get()->is_open()) {
             throw FileDoesNotExistException("File " + fileName + " is not exist");
         }
     }
@@ -75,14 +76,14 @@ void Wav::readHeader ()
     const auto file = getFile(true, fileName_);
 
     file.get()->seekg(0, std::fstream::beg);
-    size_t countByte = static_cast<size_t>(file.get()->read(reinterpret_cast<char *>(&(*this->header_.get())),
+    size_t countByte = static_cast<size_t>(file.get()->read(reinterpret_cast<char*>(&( *this->header_.get())),
                                                             sizeof(WavHeader_s)).gcount());
 
     if ( countByte != 44 ) {
         throw FileFormatException("File " + this->fileName_ + " isn't read.");
     }
 
-    file.get()->seekg (0, std::fstream::end);
+    file.get()->seekg(0, std::fstream::end);
 
     checkHeader(static_cast<const long>(file.get()->tellg()));
 }
@@ -100,19 +101,19 @@ void Wav::readData ()
     try {
         file.get()->seekg(44, std::fstream::beg);
     }
-    catch (...){
+    catch ( ... ) {
         throw WavDataException("Wav data isn't valid");
     }
 
     const auto header = this->header_.get();
 
-    const uint_fast32_t &countChannels        = header->numChannels;
+    const uint_fast32_t &countChannels = header->numChannels;
     const uint_fast32_t countSamplesInChannel = ( header->subchunk2Size / sizeof(uint_fast16_t)) / countChannels;
 
     samples.resize(countSamplesInChannel * countChannels);
 
-    uint_fast32_t readBytes = static_cast<uint_fast32_t>(file.get()->read(reinterpret_cast<char *>(samples.data()),
-                                                                          header->subchunk2Size).gcount());
+    uint_fast32_t readBytes = static_cast<uint_fast32_t>(file.get()->read(reinterpret_cast<char*>(samples.data()),
+                                                                          static_cast<std::streamsize>(header->subchunk2Size)).gcount());
 
     if ( readBytes != header_.get()->subchunk2Size ) {
         throw WavIOException("readData() read only " + std::to_string(readBytes) +
@@ -128,7 +129,7 @@ void Wav::readData ()
         data_[ i ].resize(countSamplesInChannel);
     }
 
-    for ( int ch = 0; ch < countChannels; ch++ ) {
+    for ( uint_fast32_t ch = 0; ch < countChannels; ch++ ) {
         std::deque < int_fast16_t > &chdata = data_[ ch ];
 
         for ( size_t i = 0; i < countSamplesInChannel; i++ ) {
@@ -147,7 +148,7 @@ void Wav::checkHeader (const long &fileSize) const
         throw HeaderSymbolsException("'RIFF' doesn't exist");
     }
 
-    if ( header->chunkSize != fileSize - 8 ) {
+    if ( header->chunkSize != static_cast<uint_fast32_t>(fileSize - 8)) {
         throw HeaderSizeException("Chunk size is error");
     }
 
@@ -168,12 +169,12 @@ void Wav::checkHeader (const long &fileSize) const
     }
 
     if ( header->byteRate !=
-         header->sampleRate * header->numChannels * header->bitsPerSample / 8 ) {
+         ( header->sampleRate * header->numChannels * header->bitsPerSample ) >> 3 ) {
         throw HeaderSizeException("Byte Rate is error");
     }
 
     if ( header->blockAlign !=
-         header->numChannels * header->bitsPerSample / 8 ) {
+         ( header->numChannels * header->bitsPerSample ) >> 3 ) {
         throw HeaderSizeException("Block align is error");
     }
 
@@ -181,7 +182,7 @@ void Wav::checkHeader (const long &fileSize) const
         throw HeaderSymbolsException("'data' doesn't exist");
     }
 
-    if ( header->subchunk2Size != fileSize - 44 ) {
+    if ( header->subchunk2Size != static_cast<uint_fast32_t>(fileSize - 44)) {
         throw HeaderSizeException("Sub chunk 2 size is error");
     }
 }
@@ -212,8 +213,9 @@ void Wav::save (const std::string &fileName)
 
     auto file = getFile(false, fileName);
 
-    file.get()->write(reinterpret_cast<char *>(this->header_.get()), sizeof(WavHeader_s));
-    file.get()->write(reinterpret_cast<char *>(transformData.data()), sizeof(int_fast16_t) * transformData.size());
+    file.get()->write(reinterpret_cast<char*>(this->header_.get()), sizeof(WavHeader_s));
+    file.get()->write(reinterpret_cast<char*>(transformData.data()),
+                      static_cast<std::streamsize>(sizeof(int_fast16_t) * transformData.size()));
 
     logger_.log(logger::Level::INFO, "Transform data size: " + std::to_string(transformData.size()));
     logger_.log(logger::Level::INFO, "End to save wav file_");
@@ -226,12 +228,12 @@ void Wav::preFillHeader ()
     const auto header = header_.get();
 
     header->chunkId = 0x46464952;
-    header->format  = 0x45564157;
+    header->format = 0x45564157;
 
     header->subchunk1Id = 0x20746d66;
     header->subchunk2Id = 0x61746164;
 
-    header->audioFormat   = 1;
+    header->audioFormat = 1;
     header->subchunk1Size = 16;
     header->bitsPerSample = 16;
 
@@ -262,14 +264,14 @@ void Wav::fillHeader (const uint_fast16_t &countChannels, const uint_fast16_t &b
 
     const uint_fast32_t fileBytesSize = 44 + countChannels * sizeof(uint_fast16_t) * countSamplesInChannel;
 
-    header->sampleRate  = sampleRate;
+    header->sampleRate = sampleRate;
     header->numChannels = countChannels;
 
-    header->chunkSize     = fileBytesSize - 8;
+    header->chunkSize = fileBytesSize - 8;
     header->subchunk2Size = fileBytesSize - 44;
 
-    header->byteRate   = header->sampleRate * header->numChannels * header->bitsPerSample / 8;
-    header->blockAlign = header->numChannels * header->bitsPerSample / static_cast<uint_fast16_t>(8);
+    header->byteRate = header->sampleRate * header->numChannels * header->bitsPerSample >> 3;
+    header->blockAlign = header->numChannels * header->bitsPerSample >> 3;
 
     logger_.log(logger::Level::INFO, "Fill header end");
 }
@@ -312,12 +314,12 @@ void Wav::makeReverb (const float &delaySeconds, const float &decay)
 
     this->dataChecking();
 
-    const size_t &countChannels        = data_.size();
-    const size_t countSamplesInChannel = static_cast<int>(data_[ 0 ].size());
+    const size_t &countChannels = data_.size();
+    const size_t countSamplesInChannel = data_[ 0 ].size();
 
     const auto header = header_.get();
 
-    const int delay_samples = ( int ) ( delaySeconds * header->sampleRate );
+    const uint_fast32_t delay_samples = static_cast<uint_fast32_t>( delaySeconds * header->sampleRate );
 
 
     for ( size_t ch = 0; ch < countChannels; ch++ ) {
@@ -328,14 +330,14 @@ void Wav::makeReverb (const float &delaySeconds, const float &decay)
             tmp[ i ] = static_cast<float>(data_[ ch ][ i ]);
         }
 
-        for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
+        for ( size_t i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
             tmp[ i + delay_samples ] += decay * tmp[ i ];
         }
 
         // Find maximum signal's magnitude
         float max_magnitude = 0.0f;
 
-        for ( int i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
+        for ( size_t i = 0; i < countSamplesInChannel - delay_samples; i++ ) {
             if ( std::abs(tmp[ i ]) > max_magnitude ) {
                 max_magnitude = std::abs(tmp[ i ]);
             }
@@ -441,14 +443,14 @@ std::string Wav::getInfo () const
     std::string info;
 
     info += "-------------------------\n";
-    info += " numChannels   " + std::to_string(header->numChannels) + "\n";
-    info += " sampleRate    " + std::to_string(header->sampleRate) + "\n";
-    info += " bitsPerSample " + std::to_string(header->bitsPerSample)+ "\n";
-    info += " byteRate      " + std::to_string(header->byteRate) + "\n";
-    info += " blockAlign    " + std::to_string(header->blockAlign) + "\n";
-    info += " chunkSize     " + std::to_string(header->chunkSize) + "\n";
-    info += " subchunk1Size " + std::to_string(header->subchunk1Size) + "\n";
-    info += " subchunk2Size " + std::to_string(header->subchunk2Size) + "\n";
+    info += " numChannels   " + std::to_string(static_cast<unsigned long>(header->numChannels)) + "\n";
+    info += " sampleRate    " + std::to_string(static_cast<unsigned long>(header->sampleRate)) + "\n";
+    info += " bitsPerSample " + std::to_string(static_cast<unsigned long>(header->bitsPerSample)) + "\n";
+    info += " byteRate      " + std::to_string(static_cast<unsigned long>(header->byteRate)) + "\n";
+    info += " blockAlign    " + std::to_string(static_cast<unsigned long>(header->blockAlign)) + "\n";
+    info += " chunkSize     " + std::to_string(static_cast<unsigned long>(header->chunkSize)) + "\n";
+    info += " subchunk1Size " + std::to_string(static_cast<unsigned long>(header->subchunk1Size)) + "\n";
+    info += " subchunk2Size " + std::to_string(static_cast<unsigned long>(header->subchunk2Size)) + "\n";
     info += "-------------------------\n";
 
     return info;

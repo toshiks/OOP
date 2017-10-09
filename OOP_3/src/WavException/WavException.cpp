@@ -8,13 +8,13 @@
  */
 #include "WavException.h"
 
-WavException::WavException (const std::string &message) noexcept : message(message) { }
+WavException::WavException (const std::string &message) noexcept : message_(message) { }
 
 WavException::~WavException () noexcept { }
 
 const char* WavException::what () const noexcept
 {
-    return message.c_str();
+    return message_.c_str();
 }
 
 FileDoesNotExistException::FileDoesNotExistException (const std::string &message) noexcept : WavException(message) { }

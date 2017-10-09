@@ -73,6 +73,8 @@ void Logger::log (Level level, const std::string &message) const
         case FINEST:
             logMessage += "FINEST: ";
             break;
+        default:
+            break;
     }
 
     logMessage += message;
