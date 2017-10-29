@@ -6,6 +6,7 @@
  * @date 29.10.2017
  * @version 1.0
  */
+
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -36,10 +37,9 @@ auto RegisterReader::openFile (const std::string &fileName) const
     return file;
 }
 
-
-void RegisterReader::readFile (const std::string &fileName, std::unordered_map < std::string, register_option > &data) const
+void RegisterReader::readFile (const std::string &fileName, RegisterStorage &storage) const
 {
-    data.clear();
+    storage.clear();
 
     const auto file = this->openFile(fileName);
     std::ifstream &file_r = *file.get();
@@ -48,7 +48,7 @@ void RegisterReader::readFile (const std::string &fileName, std::unordered_map <
 
     while ( file_r.good()) {
         std::getline(file_r, line);
-        this->validString(line, data);
+        this->validString(line, storage);
     }
 }
 
@@ -74,7 +74,7 @@ const std::shared_ptr < std::smatch > RegisterReader::parseString (std::string &
 }
 
 void RegisterReader::dataDistribution (const std::smatch &parsedData, const std::string &oldStr,
-                                       std::unordered_map < std::string, register_option > &data) const
+                                       RegisterStorage &storage) const
 {
     if ( parsedData.size() < 5 || parsedData.size() > 6 ) {
         throw ReaderRegisterException("Line: '" + oldStr + "' doesn't valid!");
@@ -82,6 +82,8 @@ void RegisterReader::dataDistribution (const std::smatch &parsedData, const std:
 
     std::string nameRegister = parsedData[ 1 ];
     register_option registerOption;
+
+    registerOption.name = nameRegister;
 
     if ( parsedData.size() == 6 ) {
         if (parsedData[2] != "") {
@@ -101,17 +103,15 @@ void RegisterReader::dataDistribution (const std::smatch &parsedData, const std:
         registerOption.command = parsedData[ 4 ];
     }
 
-    auto data_pointer = data.find(nameRegister);
-
-    if ( data_pointer != data.end()) {
+    if ( storage.doesExist(nameRegister) ) {
         std::cerr << "WARNING: Register '" << nameRegister << "' repeated. The last value is written.";
-        data_pointer->second = registerOption;
+        storage.replace(registerOption);
     } else {
-        data.emplace(nameRegister, registerOption);
+        storage.emplace(registerOption);
     }
 }
 
-void RegisterReader::validString (const std::string &str, std::unordered_map < std::string, register_option > &data) const
+void RegisterReader::validString (const std::string &str, RegisterStorage &storage) const
 {
     std::string workStr = str;
 
@@ -127,5 +127,5 @@ void RegisterReader::validString (const std::string &str, std::unordered_map < s
 
     const std::shared_ptr < std::smatch > dataFromStr = this->parseString(workStr, str);
 
-    this->dataDistribution(*dataFromStr.get(), str, data);
+    this->dataDistribution(*dataFromStr.get(), str, storage);
 }

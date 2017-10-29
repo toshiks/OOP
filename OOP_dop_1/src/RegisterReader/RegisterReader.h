@@ -10,22 +10,13 @@
 #define OOP_DOP_1_REGISTERREADER_H
 
 #include <string>
-#include <map>
-#include <unordered_map>
 #include <regex>
 #include <bits/shared_ptr.h>
 
+#include "../RegisterStorage/RegisterStorage.h"
+
 namespace my_register
 {
-#pragma pack(push, 1)
-    struct register_option
-    {
-        std::string addressRegister[2];
-        std::string command;
-    };
-#pragma pack(pop)
-
-
     class RegisterReader final
     {
         public:
@@ -36,19 +27,19 @@ namespace my_register
             RegisterReader (const RegisterReader &) = delete;
 
 
-            void readFile (const std::string &fileName, std::unordered_map < std::string, register_option > &data) const;
+            void readFile (const std::string &fileName, RegisterStorage &storage) const;
 
         private:
             auto openFile (const std::string &fileName) const;
 
-            void validString (const std::string &str, std::unordered_map < std::string, register_option > &data) const;
+            void validString (const std::string &str, RegisterStorage &storage) const;
 
             inline void cleanString (std::string &str) const;
 
             const std::shared_ptr < std::smatch > parseString (std::string &str, const std::string &oldStr) const;
 
             void dataDistribution (const std::smatch &parsedData, const std::string &oldStr,
-                                   std::unordered_map < std::string, register_option > &data) const;
+                                   RegisterStorage &storage) const;
 
 
             mutable bool _readingINIT = false;
