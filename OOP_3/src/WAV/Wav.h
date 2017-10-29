@@ -41,7 +41,7 @@ class Wav
         uint_fast16_t getBitsPerSample () const;
 
     private:
-        auto getFile (bool state, const std::string &fileName);
+        auto getFile (bool state, const std::string &fileName) const;
 
         void readHeader ();
 

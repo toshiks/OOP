@@ -10,11 +10,11 @@
 #include <iostream>
 using namespace logger;
 
-Logger::Logger (std::string loggerName, std::string fileName, Level level) : level_(level),
+Logger::Logger (const std::string &loggerName, const std::string &fileName, Level level) : level_(level),
                                                                              loggerName_(loggerName),
                                                                              file_(fileName) { }
 
-Logger::Logger (std::string loggerName, std::string fileName): Logger(loggerName, fileName, Level::SEVERE) { }
+Logger::Logger (const std::string &loggerName, const std::string &fileName): Logger(loggerName, fileName, Level::SEVERE) { }
 
 Logger::~Logger ()
 {
@@ -39,7 +39,7 @@ void Logger::openFile (const std::string &fileName)
     try{
         this->file_.open(fileName);
     }
-    catch (std::ifstream::failure e){
+    catch (std::exception &e){
         std::cerr << "Exception error in logger '" << loggerName_ << "'\nMessage: " << e.what();
     }
 }

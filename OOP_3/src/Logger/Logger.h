@@ -30,8 +30,8 @@ namespace logger
     class Logger
     {
         public:
-            explicit Logger(std::string loggerName, std::string fileName, Level level);
-            explicit Logger(std::string loggerName, std::string fileName);
+            explicit Logger(const std::string &loggerName, const std::string &fileName, Level level);
+            explicit Logger(const std::string &loggerName, const std::string &fileName);
             ~Logger ();
 
             void setLevel(Level level);

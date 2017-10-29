@@ -23,7 +23,7 @@ Wav::Wav () : header_(nullptr), logger_("LOGGER", "E:\\CLionProjects\\OOP\\OOP\\
  * @param fileName string of file's name
  * @return unique_ptr with FILE
  */
-auto Wav::getFile (bool state, const std::string &fileName)
+auto Wav::getFile (bool state, const std::string &fileName) const
 {
     //For auto-close file_
     auto deleter = [ & ] (std::fstream* f) {
