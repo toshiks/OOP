@@ -11,34 +11,47 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
+#include <regex>
+#include <bits/shared_ptr.h>
 
 namespace my_register
 {
-    #pragma pack(push, 1)
-    struct registerOption
+#pragma pack(push, 1)
+    struct register_option
     {
-        char addressRegister[2];
-        char command;
+        std::string addressRegister[2];
+        std::string command;
     };
-    #pragma pack(pop)
+#pragma pack(pop)
 
 
     class RegisterReader final
     {
         public:
-            explicit RegisterReader() = default;
+            explicit RegisterReader () = default;
 
             ~RegisterReader () = default;
 
-            RegisterReader(const RegisterReader&) = delete;
+            RegisterReader (const RegisterReader &) = delete;
 
 
-            void readFile(const std::string &fileName, std::map<std::string, registerOption> &data) const;
+            void readFile (const std::string &fileName, std::unordered_map < std::string, register_option > &data) const;
 
         private:
-            auto openFile(const std::string &fileName) const;
+            auto openFile (const std::string &fileName) const;
 
-            bool _readingINIT;
+            void validString (const std::string &str, std::unordered_map < std::string, register_option > &data) const;
+
+            inline void cleanString (std::string &str) const;
+
+            const std::shared_ptr < std::smatch > parseString (std::string &str, const std::string &oldStr) const;
+
+            void dataDistribution (const std::smatch &parsedData, const std::string &oldStr,
+                                   std::unordered_map < std::string, register_option > &data) const;
+
+
+            mutable bool _readingINIT = false;
 
     };
 

@@ -7,6 +7,8 @@
  * @version 1.0
  */
 #include <fstream>
+#include <iostream>
+#include <algorithm>
 #include <bits/unique_ptr.h>
 
 #include "RegisterReader.h"
@@ -16,20 +18,114 @@ using namespace my_register;
 
 auto RegisterReader::openFile (const std::string &fileName) const
 {
-    auto deleter = [] (std::fstream *f) {
+    const auto deleter = [ & ] (std::ifstream* f) {
         f->close();
         delete f;
     };
 
-    const std::fstream::openmode resume = std::fstream::in | std::fstream::binary | std::fstream::ate;
 
-    std::unique_ptr< std::fstream, decltype(deleter) > file (
-            new std::fstream(fileName.c_str(), resume),
-            deleter);
+    std::unique_ptr < std::ifstream, decltype(deleter) > file(
+            new std::ifstream(fileName.c_str()),
+            deleter
+    );
 
-    if (!file.get()->is_open()){
-        throw new ReaderRegisterException("File '" + fileName + "' doesn't exist");
+    if ( !file.get()->is_open()) {
+        throw ReaderRegisterException("File '" + fileName + "' doesn't exist");
     }
 
     return file;
+}
+
+
+void RegisterReader::readFile (const std::string &fileName, std::unordered_map < std::string, register_option > &data) const
+{
+    data.clear();
+
+    const auto file = this->openFile(fileName);
+    std::ifstream &file_r = *file.get();
+
+    std::string line;
+
+    while ( file_r.good()) {
+        std::getline(file_r, line);
+        this->validString(line, data);
+    }
+}
+
+inline void RegisterReader::cleanString (std::string &str) const
+{
+    str.erase(
+            std::remove_if(str.begin(), str.end(), isspace),
+            str.end()
+    );
+}
+
+const std::shared_ptr < std::smatch > RegisterReader::parseString (std::string &str, const std::string &oldStr) const
+{
+    const std::regex regExpr("^(R[0-9]+)(.*)0x([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
+
+    auto temp = std::make_shared < std::smatch >();
+
+    if ( !std::regex_match(str, *temp.get(), regExpr)) {
+        throw ReaderRegisterException("Line: '" + oldStr + "' doesn't valid!");
+    }
+
+    return temp;
+}
+
+void RegisterReader::dataDistribution (const std::smatch &parsedData, const std::string &oldStr,
+                                       std::unordered_map < std::string, register_option > &data) const
+{
+    if ( parsedData.size() < 5 || parsedData.size() > 6 ) {
+        throw ReaderRegisterException("Line: '" + oldStr + "' doesn't valid!");
+    }
+
+    std::string nameRegister = parsedData[ 1 ];
+    register_option registerOption;
+
+    if ( parsedData.size() == 6 ) {
+        if (parsedData[2] != "") {
+            if ( parsedData[ 2 ] == "(INIT)" && !this->_readingINIT ) {
+                this->_readingINIT = true;
+            } else {
+                throw ReaderRegisterException("Line: '" + oldStr + "'. Expression (INIT) met more than 1 time.");
+            }
+        }
+
+        registerOption.addressRegister[ 0 ] = parsedData[ 3 ];
+        registerOption.addressRegister[ 1 ] = parsedData[ 4 ];
+        registerOption.command = parsedData[ 5 ];
+    } else {
+        registerOption.addressRegister[ 0 ] = parsedData[ 2 ];
+        registerOption.addressRegister[ 1 ] = parsedData[ 3 ];
+        registerOption.command = parsedData[ 4 ];
+    }
+
+    auto data_pointer = data.find(nameRegister);
+
+    if ( data_pointer != data.end()) {
+        std::cerr << "WARNING: Register '" << nameRegister << "' repeated. The last value is written.";
+        data_pointer->second = registerOption;
+    } else {
+        data.emplace(nameRegister, registerOption);
+    }
+}
+
+void RegisterReader::validString (const std::string &str, std::unordered_map < std::string, register_option > &data) const
+{
+    std::string workStr = str;
+
+    cleanString(workStr);
+
+    if ( workStr.size() == 0 ) {
+        return;
+    }
+
+    if ( workStr[ 0 ] != 'R' ) {
+        throw ReaderRegisterException("Mistake in line: '" + str + "'. Register name doesn't support.");
+    }
+
+    const std::shared_ptr < std::smatch > dataFromStr = this->parseString(workStr, str);
+
+    this->dataDistribution(*dataFromStr.get(), str, data);
 }

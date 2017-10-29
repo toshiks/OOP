@@ -17,3 +17,5 @@ const char* RegisterException::what () const noexcept
 {
     return message_.c_str();
 }
+
+ReaderRegisterException::ReaderRegisterException (const std::string &message) noexcept : RegisterException(message){ }

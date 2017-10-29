@@ -32,7 +32,7 @@ namespace my_register
     class ReaderRegisterException final : public RegisterException
     {
         public:
-            explicit ReaderRegisterException (const std::string &message) noexcept = default;
+            explicit ReaderRegisterException (const std::string &message) noexcept;
     };
 
 
