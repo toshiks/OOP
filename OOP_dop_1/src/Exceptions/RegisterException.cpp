@@ -6,6 +6,7 @@
  * @date 29.10.2017
  * @version 1.0
  */
+
 #include "RegisterException.h"
 using namespace my_register;
 
@@ -19,3 +20,5 @@ const char* RegisterException::what () const noexcept
 }
 
 ReaderRegisterException::ReaderRegisterException (const std::string &message) noexcept : RegisterException(message){ }
+
+StorageRegisterException::StorageRegisterException (const std::string &message) noexcept : RegisterException(message){ }

@@ -6,6 +6,7 @@
  * @date 29.10.2017
  * @version 1.0
  */
+
 #ifndef OOP_DOP_1_REGISTEREXCEPTION_H
 #define OOP_DOP_1_REGISTEREXCEPTION_H
 
@@ -35,6 +36,11 @@ namespace my_register
             explicit ReaderRegisterException (const std::string &message) noexcept;
     };
 
+    class StorageRegisterException final : public RegisterException
+    {
+        public:
+            explicit StorageRegisterException (const std::string &message) noexcept;
+    };
 
 }
 
