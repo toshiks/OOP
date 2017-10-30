@@ -14,6 +14,14 @@ set(SOURCE_FILES
         src/RegisterReader/RegisterReader.cpp
         src/RegisterReader/RegisterReader.h
         src/Exceptions/RegisterException.cpp
-        src/Exceptions/RegisterException.h src/RegisterStorage/RegisterStorage.cpp src/RegisterStorage/RegisterStorage.h)
+        src/Exceptions/RegisterException.h
+        src/RegisterStorage/RegisterStorage.cpp
+        src/RegisterStorage/RegisterStorage.h
+        src/RegisterOption/RegisterOption.cpp
+        src/RegisterOption/RegisterOption.h
+        src/RegisterWriter/RegisterWriter.cpp
+        src/RegisterWriter/RegisterWriter.h
+        src/RegisterDriver/RegisterDriver.cpp
+        src/RegisterDriver/RegisterDriver.h)
 
 add_executable(OOP_dop_1 ${SOURCE_FILES})
