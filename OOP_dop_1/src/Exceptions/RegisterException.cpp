@@ -21,3 +21,5 @@ const char *RegisterException::what() const noexcept {
 ReaderRegisterException::ReaderRegisterException(const std::string &message) noexcept : RegisterException(message) {}
 
 StorageRegisterException::StorageRegisterException(const std::string &message) noexcept : RegisterException(message) {}
+
+WriterRegisterException::WriterRegisterException(const std::string &message) noexcept : RegisterException(message) {}

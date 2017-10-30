@@ -37,6 +37,11 @@ class StorageRegisterException final : public RegisterException {
   explicit StorageRegisterException(const std::string &message) noexcept;
 };
 
+class WriterRegisterException final : public RegisterException {
+ public:
+  explicit WriterRegisterException(const std::string &message) noexcept;
+};
+
 }
 
 #endif //OOP_DOP_1_REGISTEREXCEPTION_H
