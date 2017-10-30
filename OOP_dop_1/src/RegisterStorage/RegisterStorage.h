@@ -14,18 +14,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../RegisterOption/RegisterOption.h"
+
 
 namespace my_register
 {
-#pragma pack(push, 1)
-    struct register_option
-    {
-        std::string name;
-        std::string addressRegister[2];
-        std::string command;
-    };
-#pragma pack(pop)
-
     class RegisterStorage
     {
         public:
@@ -33,13 +26,13 @@ namespace my_register
 
             ~RegisterStorage () = default;
 
-            void emplace(const register_option &registerOption);
+            void emplace(const RegisterOption &registerOption);
 
-            void replace(const register_option &newRegisterOption);
+            void replace(const RegisterOption &newRegisterOption);
 
             uint_fast32_t size() const;
 
-            register_option operator [](const uint_fast32_t &n) const;
+            RegisterOption operator [](const uint_fast32_t &n) const;
 
             void clear();
 
@@ -47,7 +40,7 @@ namespace my_register
 
         private:
             std::unordered_map<std::string, uint_fast32_t> registersName_;
-            std::vector<register_option> optionsOfRegiter_;
+            std::vector<RegisterOption> optionsOfRegiter_;
 
     };
 

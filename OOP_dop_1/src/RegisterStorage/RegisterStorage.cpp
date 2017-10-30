@@ -11,9 +11,9 @@
 #include "../Exceptions/RegisterException.h"
 using namespace my_register;
 
-void RegisterStorage::emplace (const register_option &registerOption)
+void RegisterStorage::emplace (const RegisterOption &registerOption)
 {
-    const std::string &registerName = registerOption.name;
+    const std::string &registerName = registerOption.getName();
 
     if ( this->doesExist(registerName) ){
         return;
@@ -26,9 +26,9 @@ void RegisterStorage::emplace (const register_option &registerOption)
     this->optionsOfRegiter_.emplace_back(registerOption);
 }
 
-void RegisterStorage::replace (const register_option &newRegisterOption)
+void RegisterStorage::replace (const RegisterOption &newRegisterOption)
 {
-    const auto temp = this->registersName_.find(newRegisterOption.name);
+    const auto temp = this->registersName_.find(newRegisterOption.getName());
 
     if ( temp == this->registersName_.end() ){
         return;
@@ -42,7 +42,7 @@ uint_fast32_t RegisterStorage::size () const
     return this->optionsOfRegiter_.size();
 }
 
-register_option RegisterStorage::operator[] (const uint_fast32_t &n) const
+RegisterOption RegisterStorage::operator[] (const uint_fast32_t &n) const
 {
     if (n >= this->optionsOfRegiter_.size()){
         throw StorageRegisterException("Array index out of bounds");
