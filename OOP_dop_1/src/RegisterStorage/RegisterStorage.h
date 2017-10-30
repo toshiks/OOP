@@ -23,6 +23,8 @@ class RegisterStorage {
 
   ~RegisterStorage() = default;
 
+  RegisterStorage(const RegisterStorage&) = delete;
+
   void emplace(const RegisterOption &registerOption);
 
   void replace(const RegisterOption &newRegisterOption);
