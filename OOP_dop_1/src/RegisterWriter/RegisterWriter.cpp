@@ -26,9 +26,7 @@ const std::vector<std::vector<std::string> > postambula{{"01", "43", "D1"},
                                                         {"01", "43", "52"},
                                                         {"01", "39", "02"}};
 
-RegisterWriter::RegisterWriter(const RegisterStorage &storage) {
-  this->changeRegisterStorage(storage);
-}
+RegisterWriter::RegisterWriter() : writeStringHeader_("None"), writeStringIni_("None"){}
 
 auto RegisterWriter::openFile(const std::string &fileName) const {
   auto deleter = [](std::ofstream *f) {
@@ -85,7 +83,7 @@ void RegisterWriter::changeRegisterStorage(const RegisterStorage &storage) {
 
 void RegisterWriter::createStringHeaderFromRegisterStorage(const RegisterStorage &storage) {
   int count = 0;
-  this->writeStringHeader_ += "const uint8_t LmkConfigCmds[numCommands][3]={\n";
+  this->writeStringHeader_ = "const uint8_t LmkConfigCmds[numCommands][3]={\n";
 
   if (storage[0].isPreambula()) {
     for (const auto &reg : preambula) {
@@ -122,6 +120,8 @@ void RegisterWriter::createStringHeaderFromRegisterStorage(const RegisterStorage
 }
 
 void RegisterWriter::createStringIniFromRegisterStorage(const RegisterStorage &storage) {
+  this->writeStringIni_ = "";
+
   if (storage[0].isPreambula()) {
 
     for (const auto &reg : preambula) {

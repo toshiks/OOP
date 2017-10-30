@@ -17,7 +17,7 @@
 namespace my_register {
 class RegisterWriter final {
  public:
-  explicit RegisterWriter(const RegisterStorage &storage);
+  explicit RegisterWriter();
 
   ~RegisterWriter() = default;
 
