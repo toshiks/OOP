@@ -41,6 +41,11 @@ namespace my_register
             void dataDistribution (const std::smatch &parsedData, const std::string &oldStr,
                                    RegisterStorage &storage) const;
 
+            void validateData(const RegisterStorage &storage) const;
+
+            void validatePreambula(const RegisterStorage &storage) const;
+
+            void validatePostambula(const RegisterStorage &storage) const;
 
             mutable bool _readingINIT = false;
 
