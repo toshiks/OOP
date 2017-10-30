@@ -10,15 +10,14 @@
 #include "RegisterException.h"
 using namespace my_register;
 
-RegisterException::RegisterException (const std::string &message) noexcept : message_(message) { }
+RegisterException::RegisterException(const std::string &message) noexcept : message_(message) {}
 
-RegisterException::~RegisterException () noexcept { }
+RegisterException::~RegisterException() noexcept {}
 
-const char* RegisterException::what () const noexcept
-{
-    return message_.c_str();
+const char *RegisterException::what() const noexcept {
+  return message_.c_str();
 }
 
-ReaderRegisterException::ReaderRegisterException (const std::string &message) noexcept : RegisterException(message){ }
+ReaderRegisterException::ReaderRegisterException(const std::string &message) noexcept : RegisterException(message) {}
 
-StorageRegisterException::StorageRegisterException (const std::string &message) noexcept : RegisterException(message){ }
+StorageRegisterException::StorageRegisterException(const std::string &message) noexcept : RegisterException(message) {}

@@ -16,33 +16,30 @@
 
 #include "../RegisterOption/RegisterOption.h"
 
+namespace my_register {
+class RegisterStorage {
+ public:
+  explicit RegisterStorage() = default;
 
-namespace my_register
-{
-    class RegisterStorage
-    {
-        public:
-            explicit RegisterStorage() = default;
+  ~RegisterStorage() = default;
 
-            ~RegisterStorage () = default;
+  void emplace(const RegisterOption &registerOption);
 
-            void emplace(const RegisterOption &registerOption);
+  void replace(const RegisterOption &newRegisterOption);
 
-            void replace(const RegisterOption &newRegisterOption);
+  uint_fast32_t size() const;
 
-            uint_fast32_t size() const;
+  RegisterOption operator[](const uint_fast32_t &n) const;
 
-            RegisterOption operator [](const uint_fast32_t &n) const;
+  void clear();
 
-            void clear();
+  bool doesExist(const std::string &registerName) const;
 
-            bool doesExist(const std::string &registerName) const;
+ private:
+  std::unordered_map<std::string, uint_fast32_t> registersName_;
+  std::vector<RegisterOption> optionsOfRegiter_;
 
-        private:
-            std::unordered_map<std::string, uint_fast32_t> registersName_;
-            std::vector<RegisterOption> optionsOfRegiter_;
-
-    };
+};
 
 }
 

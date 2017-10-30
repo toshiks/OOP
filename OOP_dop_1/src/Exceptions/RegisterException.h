@@ -13,36 +13,30 @@
 #include <exception>
 #include <string>
 
-namespace my_register
-{
-    class RegisterException : public std::exception
-    {
-        public:
-            explicit RegisterException (const std::string &message) noexcept;
+namespace my_register {
+class RegisterException : public std::exception {
+ public:
+  explicit RegisterException(const std::string &message) noexcept;
 
-            ~RegisterException () noexcept;
+  ~RegisterException() noexcept;
 
+  const char *what() const noexcept override;
 
-            const char* what () const noexcept override;
+ private:
+  std::string message_;
 
-        private:
-            std::string message_;
+};
 
-    };
+class ReaderRegisterException final : public RegisterException {
+ public:
+  explicit ReaderRegisterException(const std::string &message) noexcept;
+};
 
-    class ReaderRegisterException final : public RegisterException
-    {
-        public:
-            explicit ReaderRegisterException (const std::string &message) noexcept;
-    };
-
-    class StorageRegisterException final : public RegisterException
-    {
-        public:
-            explicit StorageRegisterException (const std::string &message) noexcept;
-    };
+class StorageRegisterException final : public RegisterException {
+ public:
+  explicit StorageRegisterException(const std::string &message) noexcept;
+};
 
 }
-
 
 #endif //OOP_DOP_1_REGISTEREXCEPTION_H

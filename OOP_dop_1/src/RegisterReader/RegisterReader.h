@@ -15,43 +15,37 @@
 
 #include "../RegisterStorage/RegisterStorage.h"
 
-namespace my_register
-{
-    class RegisterReader final
-    {
-        public:
-            explicit RegisterReader () = default;
+namespace my_register {
+class RegisterReader final {
+ public:
+  explicit RegisterReader() = default;
 
-            ~RegisterReader () = default;
+  ~RegisterReader() = default;
 
-            RegisterReader (const RegisterReader &) = delete;
+  RegisterReader(const RegisterReader &) = delete;
 
+  void readFile(const std::string &fileName, RegisterStorage &storage) const;
 
-            void readFile (const std::string &fileName, RegisterStorage &storage) const;
+ private:
+  auto openFile(const std::string &fileName) const;
 
-        private:
-            auto openFile (const std::string &fileName) const;
+  void validString(const std::string &str, RegisterStorage &storage) const;
 
-            void validString (const std::string &str, RegisterStorage &storage) const;
+  inline void cleanString(std::string &str) const;
 
-            inline void cleanString (std::string &str) const;
+  const std::shared_ptr<std::smatch> parseString(std::string &str, const std::string &oldStr) const;
 
-            const std::shared_ptr < std::smatch > parseString (std::string &str, const std::string &oldStr) const;
+  void dataDistribution(const std::smatch &parsedData, const std::string &oldStr,
+                        RegisterStorage &storage) const;
 
-            void dataDistribution (const std::smatch &parsedData, const std::string &oldStr,
-                                   RegisterStorage &storage) const;
+  void validateData      (const RegisterStorage &storage) const;
+  void validatePreambula (const RegisterStorage &storage) const;
+  void validatePostambula(const RegisterStorage &storage) const;
 
-            void validateData(const RegisterStorage &storage) const;
+  mutable bool _readingINIT = false;
 
-            void validatePreambula(const RegisterStorage &storage) const;
-
-            void validatePostambula(const RegisterStorage &storage) const;
-
-            mutable bool _readingINIT = false;
-
-    };
+};
 
 }
-
 
 #endif //OOP_DOP_1_REGISTERREADER_H
