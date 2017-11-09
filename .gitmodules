@@ -1,3 +1,3 @@
-[submodule "googletest"]
-	path = OOP_4_and_5/vendor/googleTests
+[submodule "OOP_4_and_5/vendor/googletest"]
+	path = OOP_4_and_5/vendor/googletest
 	url = git@github.com:google/googletest.git
