@@ -72,3 +72,23 @@ TEST(CalculateLegendre, Test15) {
 TEST(CalculateLegendre, Test16) {
   EXPECT_EQ(0, MathFunctions::symbolOfLegendres(5005, 25050025));
 }
+
+TEST(CalculateShanks_Tonelli, Test1) {
+  EXPECT_EQ(7, MathFunctions::Shanks_Tonelli(10, 13));
+}
+
+TEST(CalculateShanks_Tonelli, Test2) {
+  EXPECT_EQ(37, MathFunctions::Shanks_Tonelli(56, 101));
+}
+
+TEST(CalculateShanks_Tonelli, Test3) {
+  EXPECT_EQ(1632, MathFunctions::Shanks_Tonelli(1030, 10009));
+}
+
+TEST(CalculateShanks_Tonelli, Test4) {
+  EXPECT_EQ(30468, MathFunctions::Shanks_Tonelli(44402, 100049));
+}
+
+TEST(CalculateShanks_Tonelli, Test5) {
+  EXPECT_EQ(378633312, MathFunctions::Shanks_Tonelli(665820697, 1000000009));
+}

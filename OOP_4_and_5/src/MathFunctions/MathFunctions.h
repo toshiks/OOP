@@ -19,6 +19,8 @@ class MathFunctions {
   MathFunctions &operator=(const MathFunctions &) = delete;
 
   static int symbolOfLegendres(int a, int b);
+  static long long Shanks_Tonelli(const long long& n, const long long& p);
+  static long long pow_mod(long long x, long long y, long long z);
 
  private:
 
