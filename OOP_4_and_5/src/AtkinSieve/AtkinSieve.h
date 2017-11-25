@@ -13,41 +13,53 @@
 
 #include <set>
 #include <vector>
+#include <cstdio>
 
 class AtkinSieve final {
 
  public:
-  AtkinSieve() = default;
+  AtkinSieve() : maxCurrentLimits_(0) {};
   AtkinSieve(const AtkinSieve &) = delete;
   AtkinSieve &operator=(const AtkinSieve &) = delete;
 
-  std::set<int> getPrimes(const unsigned int &limit);
+  void setPrimes(const long long &limit);
+
+  size_t size() const;
+
+  std::vector<long long>::const_iterator begin() const;
+  std::vector<long long>::const_iterator end() const;
+
+  long long operator[] (size_t n) const;
 
  private:
   std::vector<char> is_prime_;
 
-  void reverseStatePrime(const unsigned int &pos);
-  void setStatePrime(const unsigned int &pos, const bool &state);
+  void reverseStatePrime(const long long &pos);
+  void setStatePrime(const long long &pos, const bool &state);
 
-  void firstStepAlgorithm(const unsigned int &limit);
-  void secondStepAlgorithm(const unsigned int &limit);
-  void thirdStepAlgorithm(const unsigned int &limit);
+  void firstStepAlgorithm(const long long &limit);
+  void secondStepAlgorithm(const long long &limit);
+  void thirdStepAlgorithm(const long long &limit);
 
-  void sievingOneWheel(const unsigned int &p, const unsigned int &limit);
-  void sieving(const unsigned int &limit);
+  void sievingOneWheel(const long long &p, const long long &limit);
+  void sieving(const long long &limit);
+
+  void fillNumbersToPrimes(const long long &limit);
 
   // Numbers from description of algorithms
-  const std::set<unsigned int> firstInvariants{1, 13, 17, 29, 37, 41, 49, 53};
-  const std::set<unsigned int> secondInvariants{7, 19, 31, 43};
-  const std::set<unsigned int> thirdInvariants{11, 23, 47, 59};
+  const std::set<long long> firstInvariants{1, 13, 17, 29, 37, 41, 49, 53};
+  const std::set<long long> secondInvariants{7, 19, 31, 43};
+  const std::set<long long> thirdInvariants{11, 23, 47, 59};
 
   // Numbers from firstInvariants + secondInvariants + thirdInvariants
-  const std::set<unsigned int> sieving_primes{1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59};
+  const std::set<long long> sieving_primes{1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59};
 
   // Some odd simple numbers
-  const std::vector<unsigned int> first_primes{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59};
+  const std::vector<long long> first_primes{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59};
 
-  std::set<int> primes;
+  std::vector<long long> primes_;
+
+  long long maxCurrentLimits_;
 };
 
 #endif //OOP_4_AND_5_ATKINSIEVE_H
