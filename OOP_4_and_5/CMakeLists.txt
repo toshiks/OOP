@@ -32,7 +32,11 @@ set(SOURCE_FILES
         src/QuadraticSieve/QuadraticSieve.cpp
         src/QuadraticSieve/QuadraticSieve.h
         tests/TestQuadraticSieve.cpp
-        src/Worker/Worker.cpp src/Worker/Worker.h)
+        src/Worker/Worker.cpp
+        src/Worker/Worker.h
+        src/Factorizer/Factorizer.cpp
+        src/Factorizer/Factorizer.h
+        )
 
 add_executable(OOP_4_and_5 ${SOURCE_FILES})
 

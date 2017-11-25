@@ -8,7 +8,6 @@
  */
 
 #include <iostream>
-#include <regex>
 
 #include "Worker.h"
 
@@ -37,11 +36,15 @@ bool Worker::validNumber(const std::string &str) const {
   return symbol == str.end();
 }
 
-std::string Worker::generateString(const mpz_class &number, const mpz_class &deleter) {
-  mpz_class temp;
-  mpz_div(temp.get_mpz_t(), number.get_mpz_t(), deleter.get_mpz_t());
+std::string Worker::generateString(const mpz_class &number, const std::vector<mpz_class> &deleter) {
+  std::string str = number.get_str() + " = ";
+  for(const auto& i: deleter){
+    str += i.get_str() + " * ";
+  }
 
-  std::string str = number.get_str() + " = " + deleter.get_str() + " * " + temp.get_str();
+  str.pop_back();
+  str.pop_back();
+  str.pop_back();
 
   return str;
 }
@@ -56,7 +59,7 @@ void Worker::start() {
       throw std::invalid_argument("File contains wrong number");
     }
     mpz_class number(x.c_str(), 10);
-    mpz_class deleter = sieve_.factorNumber(number);
+    std::vector<mpz_class> deleter = this->factorizer_.factorize(number);
 
     *outputFile_ << this->generateString(number, deleter) << '\n';
   }

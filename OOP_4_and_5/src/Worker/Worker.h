@@ -15,7 +15,7 @@
 #include <fstream>
 #include <gmpxx.h>
 #include <gmp.h>
-#include <QuadraticSieve/QuadraticSieve.h>
+#include <Factorizer/Factorizer.h>
 
 class Worker {
  public:
@@ -27,13 +27,13 @@ class Worker {
 
   bool validNumber(const std::string& str) const;
 
-  std::string generateString(const mpz_class& number, const mpz_class& deleter);
+  std::string generateString(const mpz_class& number, const std::vector<mpz_class>& deleter);
 
   std::shared_ptr<std::fstream> inputFile_;
   std::shared_ptr<std::fstream> outputFile_;
   std::string inputFileName_;
   std::string outputFileName_;
-  QuadraticSieve sieve_;
+  Factorizer factorizer_;
 };
 
 #endif //OOP_4_AND_5_WORKER_H
