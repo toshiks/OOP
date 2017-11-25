@@ -10,20 +10,15 @@
 #define OOP_4_AND_5_MATHFUNCTIONS_H
 
 #include <vector>
+#include <gmpxx.h>
 
-class MathFunctions {
- public:
-  MathFunctions() = delete;
-  ~MathFunctions() = delete;
-  MathFunctions(const MathFunctions &) = delete;
-  MathFunctions &operator=(const MathFunctions &) = delete;
+namespace MathFunctions {
 
-  static int symbolOfLegendres(int a, int b);
-  static long long Shanks_Tonelli(const long long& n, const long long& p);
-  static long long pow_mod(long long x, long long y, long long z);
+  std::pair<uint32_t, uint32_t> Shanks_Tonelli(const uint32_t &n, const uint32_t &p);
+  int64_t simple_legendre(const uint64_t &nl, const uint64_t &pl);
+  uint64_t pow_mod(uint64_t x, uint64_t y, uint64_t z);
+  uint32_t mod(const mpz_class& x, const mpz_class& y);
 
- private:
-
-};
+}
 
 #endif //OOP_4_AND_5_MATHFUNCTIONS_H

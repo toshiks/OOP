@@ -8,87 +8,40 @@
  */
 #include <gtest/gtest.h>
 #include "../src/MathFunctions/MathFunctions.h"
-
-TEST(CalculateLegendre, Test1){
-  EXPECT_EQ(-1, MathFunctions::symbolOfLegendres(3, 29));
-};
-
-TEST(CalculateLegendre, Test2) {
-  EXPECT_EQ(-1, MathFunctions::symbolOfLegendres(111, 41));
-}
-
-TEST(CalculateLegendre, Test3) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(113, 41));
-}
-
-TEST(CalculateLegendre, Test4) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(2, 31));
-}
-
-TEST(CalculateLegendre, Test5) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(5, 31));
-}
-
-TEST(CalculateLegendre, Test6) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(150, 1009));
-}
-
-TEST(CalculateLegendre, Test7) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(25, 1009));
-}
-
-TEST(CalculateLegendre, Test8) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(2, 1009));
-}
-
-TEST(CalculateLegendre, Test9) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(3, 1009));
-}
-
-TEST(CalculateLegendre, Test10) {
-  EXPECT_EQ(-1, MathFunctions::symbolOfLegendres(126, 53));
-}
-
-TEST(CalculateLegendre, Test11) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(1, 231231));
-}
-
-TEST(CalculateLegendre, Test12) {
-  EXPECT_EQ(-1, MathFunctions::symbolOfLegendres(-1, 15));
-}
-
-TEST(CalculateLegendre, Test13) {
-  EXPECT_EQ(1, MathFunctions::symbolOfLegendres(7, 31));
-}
-
-TEST(CalculateLegendre, Test14) {
-  EXPECT_EQ(-1, MathFunctions::symbolOfLegendres(5, 193));
-}
-
-TEST(CalculateLegendre, Test15) {
-  EXPECT_EQ(-1, MathFunctions::symbolOfLegendres(1350, 1381));
-}
-
-TEST(CalculateLegendre, Test16) {
-  EXPECT_EQ(0, MathFunctions::symbolOfLegendres(5005, 25050025));
-}
+#include <gmpxx.h>
 
 TEST(CalculateShanks_Tonelli, Test1) {
-  EXPECT_EQ(7, MathFunctions::Shanks_Tonelli(10, 13));
+  EXPECT_EQ(std::make_pair(7u, 6u), MathFunctions::Shanks_Tonelli(10, 13));
 }
 
 TEST(CalculateShanks_Tonelli, Test2) {
-  EXPECT_EQ(37, MathFunctions::Shanks_Tonelli(56, 101));
+  EXPECT_EQ(std::make_pair(37u, 64u), MathFunctions::Shanks_Tonelli(56, 101));
 }
 
 TEST(CalculateShanks_Tonelli, Test3) {
-  EXPECT_EQ(1632, MathFunctions::Shanks_Tonelli(1030, 10009));
+  EXPECT_EQ(std::make_pair(1632u, 8377u), MathFunctions::Shanks_Tonelli(1030, 10009));
 }
 
 TEST(CalculateShanks_Tonelli, Test4) {
-  EXPECT_EQ(30468, MathFunctions::Shanks_Tonelli(44402, 100049));
+  EXPECT_EQ(std::make_pair(30468u, 69581u), MathFunctions::Shanks_Tonelli(44402, 100049));
 }
 
 TEST(CalculateShanks_Tonelli, Test5) {
-  EXPECT_EQ(378633312, MathFunctions::Shanks_Tonelli(665820697, 1000000009));
+  EXPECT_EQ(std::make_pair(378633312u, 621366697u), MathFunctions::Shanks_Tonelli(665820697, 1000000009));
+}
+
+TEST(CalculateMod, Test1) {
+  EXPECT_EQ(3, MathFunctions::mod(27, 4));
+}
+
+TEST(CalculateMod, Test2) {
+  EXPECT_EQ(1, MathFunctions::mod(-15, 4));
+}
+
+TEST(CalculateMod, Test3) {
+  EXPECT_EQ(2, MathFunctions::mod(113, -3));
+}
+
+TEST(CalculateMod, Test4) {
+  EXPECT_EQ(6, MathFunctions::mod(-15, -7));
 }
