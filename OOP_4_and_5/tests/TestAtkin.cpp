@@ -14,7 +14,7 @@
 #include <iostream>
 #include <thread>
 #include <random>
-#include "../src/AtkinSieve/AtkinSieve.h"
+#include <AtkinSieve/AtkinSieve.h>
 
 class AtkinFixture : public ::testing::Test {
  public:
@@ -58,70 +58,68 @@ std::set<unsigned int> genTest(const unsigned int &limit) {
 
 TEST_F(AtkinFixture, RightSmallTest) {
   auto test = genTest(100);
-  auto s = atkinSieve->getPrimes(100);
+  atkinSieve->setPrimes(100);
 
-  ASSERT_EQ(test.size(), s.size());
+  ASSERT_EQ(test.size(), atkinSieve->size());
   auto test_it = test.begin();
-  auto ans_it = s.begin();
+  auto atkin_it = atkinSieve->begin();
 
-  while (ans_it != s.end()) {
-    EXPECT_EQ(*ans_it, *test_it);
-    ans_it++;
+  while (atkin_it != atkinSieve->end()){
+    EXPECT_EQ(*atkin_it, *test_it);
+    atkin_it++;
     test_it++;
   }
 }
 
 TEST_F(AtkinFixture, RightLargeTest) {
   auto test = genTest(10000);
-  auto s = atkinSieve->getPrimes(10000);
+  atkinSieve->setPrimes(10000);
 
-  ASSERT_EQ(test.size(), s.size());
+  ASSERT_EQ(test.size(), atkinSieve->size());
   auto test_it = test.begin();
-  auto ans_it = s.begin();
+  auto atkin_it = atkinSieve->begin();
 
-  while (ans_it != s.end()) {
-    EXPECT_EQ(*ans_it, *test_it);
-    ans_it++;
+  while (atkin_it != atkinSieve->end()){
+    EXPECT_EQ(*atkin_it, *test_it);
+    atkin_it++;
     test_it++;
   }
 }
 
 TEST_F(AtkinFixture, RightBigTest) {
   auto test = genTest(10000000);
-  auto s = atkinSieve->getPrimes(10000000);
+  atkinSieve->setPrimes(10000000);
 
-  ASSERT_EQ(test.size(), s.size());
+  ASSERT_EQ(test.size(), atkinSieve->size());
   auto test_it = test.begin();
-  auto ans_it = s.begin();
+  auto atkin_it = atkinSieve->begin();
 
-  while (ans_it != s.end()) {
-    EXPECT_EQ(*ans_it, *test_it);
-    ans_it++;
+  while (atkin_it != atkinSieve->end()){
+    EXPECT_EQ(*atkin_it, *test_it);
+    atkin_it++;
     test_it++;
   }
 }
 
-TEST_F(AtkinFixture, GenBigTest) {
-  auto s = atkinSieve->getPrimes(500000000);
-}
 
 TEST_F(AtkinFixture, RightDiffTest) {
   std::mt19937 mt(static_cast<unsigned int>(time(nullptr)));
   std::uniform_int_distribution<unsigned int> dist(0, 10000000);
+
   for (int i = 1; i <= 10; i++) {
     unsigned int n = dist(mt);
 
     std::cout << "Test " << i << " start. Count: " << n << '\n';
     auto test = genTest(n);
-    auto s = atkinSieve->getPrimes(n);
+    atkinSieve->setPrimes(n);
 
-    EXPECT_EQ(test.size(), s.size());
+    EXPECT_EQ(test.size(), atkinSieve->size());
     auto test_it = test.begin();
-    auto ans_it = s.begin();
+    auto atkin_it = atkinSieve->begin();
 
-    while (ans_it != s.end()) {
-      ASSERT_EQ(*ans_it, *test_it);
-      ans_it++;
+    while (atkin_it != atkinSieve->end()){
+      EXPECT_EQ(*atkin_it, *test_it);
+      atkin_it++;
       test_it++;
     }
   }
