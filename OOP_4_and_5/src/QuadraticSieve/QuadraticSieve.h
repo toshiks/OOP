@@ -23,7 +23,7 @@
 class QuadraticSieve final{
 
  public:
-  QuadraticSieve() = default;
+  QuadraticSieve();
 
   mpz_class factorNumber(const mpz_class &n);
 
@@ -74,9 +74,12 @@ class QuadraticSieve final{
 
   mpz_class factor(const mpz_class &n, const mpz_class &sqrtN, uint32_t startFactorBase = 300);
 
+  mpz_class testsForSimplicitySolve(const mpz_class &n, const mpz_class& sqrtN);
+
   AtkinSieve atkinSieve_;
   std::mutex m_;
   std::map<mpz_class, mpz_class> storage_;
+  std::vector<uint32_t> firstPrimes;
 };
 
 #endif //OOP_4_AND_5_QUADRATICSIEVE_H

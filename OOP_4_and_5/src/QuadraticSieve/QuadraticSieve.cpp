@@ -18,6 +18,15 @@
 #include <map>
 #include <Matrix/Matrix.h>
 
+
+QuadraticSieve::QuadraticSieve() {
+  this->atkinSieve_.setPrimes(35000);
+
+  for (const auto &i: this->atkinSieve_) {
+    firstPrimes.emplace_back(i);
+  }
+}
+
 void QuadraticSieve::createFactorBase(const mpz_class &n,
                                       std::vector<uint32_t> &factorBase,
                                       uint32_t startFactorBaseSize) {
@@ -39,8 +48,9 @@ void QuadraticSieve::filterFactorBase(const mpz_class &n, std::vector<uint32_t> 
   lg.unlock();
 
   for (const auto &i: temp) {
-    if (mpz_legendre(n.get_mpz_t(), mpz_class(i).get_mpz_t()) == 1)
+    if (mpz_legendre(n.get_mpz_t(), mpz_class(i).get_mpz_t()) == 1) {
       factorBase.emplace_back(i);
+    }
   }
 }
 
@@ -291,19 +301,52 @@ mpz_class QuadraticSieve::factor(const mpz_class &n, const mpz_class &sqrtN, uin
   return factor;
 }
 
+/**
+ * Solve equation Q = (x + sqrt(N)) - N
+ */
+mpz_class QuadraticSieve::solveFactorBaseEquation(const mpz_class &n, const mpz_class &sqrtN, const uint32_t &x) {
+  mpz_class Q = x;
+  mpz_add(Q.get_mpz_t(), Q.get_mpz_t(), sqrtN.get_mpz_t());
+  mpz_pow_ui(Q.get_mpz_t(), Q.get_mpz_t(), 2);
+  mpz_sub(Q.get_mpz_t(),Q.get_mpz_t(), n.get_mpz_t());
+  return Q;
+}
+
+mpz_class QuadraticSieve::testsForSimplicitySolve(const mpz_class &n, const mpz_class &sqrtN) {
+  // If N = sqrt(n) * sqrt(n), then return sqrt(N)
+  if (mpz_perfect_square_p(n.get_mpz_t()))
+    return sqrtN;
+
+  // If N divide on one of first primary (about 5000), then return it primary
+  for (const auto& prime: this->firstPrimes){
+    if (mpz_divisible_ui_p(n.get_mpz_t(), prime))
+      return prime;
+  }
+
+  // If N - primary, return 1
+  int isPrime = mpz_probab_prime_p(n.get_mpz_t(), 10);
+  if (isPrime)
+    return 1;
+
+  return 0;
+}
+
 mpz_class QuadraticSieve::factorNumber(const mpz_class &n) {
+  std::unique_lock<std::mutex> ul(this->m_);
   const auto temp = storage_.find(n);
   if (temp != this->storage_.end()){
     return temp->second;
   }
+  ul.unlock();
 
   const mpz_class sqrtN = sqrt(n);
 
-  const mpz_class thresholdSizeFactorBase("100000000", 10);
+  auto testResult = this->testsForSimplicitySolve(n, sqrtN);
+  if (testResult != 0){
+    return testResult;
+  }
 
-  int isPrime = mpz_probab_prime_p(n.get_mpz_t(), 16);
-  if (isPrime == 2)
-    return 1;
+  const mpz_class thresholdSizeFactorBase("10000000", 10);
 
   mpz_class ans = factor(n, sqrtN);
 
@@ -327,22 +370,11 @@ mpz_class QuadraticSieve::factorNumber(const mpz_class &n) {
     }
   }
 
-
-  std::unique_lock<std::mutex> lg(this->m_);
-  this->storage_[n] = ans;
-  lg.unlock();
+  ul.lock();
+  if (this->storage_.find(n) != this->storage_.end()) {
+    this->storage_[n] = ans;
+  }
+  ul.unlock();
 
   return ans;
-}
-
-
-/**
- * Solve equation Q = (x + sqrt(N)) - N
- */
-mpz_class QuadraticSieve::solveFactorBaseEquation(const mpz_class &n, const mpz_class &sqrtN, const uint32_t &x) {
-  mpz_class Q = x;
-  mpz_add(Q.get_mpz_t(), Q.get_mpz_t(), sqrtN.get_mpz_t());
-  mpz_pow_ui(Q.get_mpz_t(), Q.get_mpz_t(), 2);
-  mpz_sub(Q.get_mpz_t(),Q.get_mpz_t(), n.get_mpz_t());
-  return Q;
 }

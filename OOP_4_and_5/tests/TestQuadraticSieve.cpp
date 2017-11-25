@@ -103,3 +103,9 @@ TEST_F(QuadraticSieveTest, TestCreateFactorBase11) {
   EXPECT_EQ(0, simpleTest(num));
 }
 
+TEST_F(QuadraticSieveTest, TestCreateFactorBase12) {
+  mpz_class num = mpz_class("15627", 10);
+
+  EXPECT_EQ(0, simpleTest(num));
+}
+
