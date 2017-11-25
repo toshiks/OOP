@@ -49,6 +49,10 @@ void AtkinSieve::setPrimes(const long long &limit) {
 
   this->sieving(limit);
 
+  for (const auto& i: this->first_primes){
+    is_prime_[i] = true;
+  }
+
   fillNumbersToPrimes(limit);
 }
 
@@ -168,4 +172,11 @@ std::vector<long long>::const_iterator AtkinSieve::begin() const {
 
 std::vector<long long>::const_iterator AtkinSieve::end() const {
   return this->primes_.end();
+}
+
+bool AtkinSieve::isPrime(const long long n) {
+  if (n >= this->is_prime_.size())
+    throw std::invalid_argument("N more then size()");
+
+  return this->is_prime_[n];
 }
