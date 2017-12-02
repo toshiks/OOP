@@ -332,6 +332,10 @@ mpz_class QuadraticSieve::testsForSimplicitySolve(const mpz_class &n, const mpz_
 }
 
 mpz_class QuadraticSieve::factorNumber(const mpz_class &n) {
+  if (mpz_sizeinbase(n.get_mpz_t(), 10) >= 100){
+    throw std::invalid_argument("Number has more 99 digits.");
+  }
+
   std::unique_lock<std::mutex> ul(this->m_);
   const auto temp = storage_.find(n);
   if (temp != this->storage_.end()){
@@ -346,6 +350,7 @@ mpz_class QuadraticSieve::factorNumber(const mpz_class &n) {
     return testResult;
   }
 
+  // The experimentally obtained value
   const mpz_class thresholdSizeFactorBase("10000000", 10);
 
   mpz_class ans = factor(n, sqrtN);

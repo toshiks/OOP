@@ -42,27 +42,30 @@ std::vector<mpz_class> Factorizer::factorize(const mpz_class &x) {
     return solve;
 
   std::queue<mpz_class> queue;
-  mpz_class tempX = x;
-
-  queue.push(tempX);
+  queue.push(x);
 
   while (!queue.empty()){
     const mpz_class number = std::move(queue.front());
     queue.pop();
 
-
     if (this->addExistDividerNumbers(solve, number))
       continue;
 
-
-    const mpz_class divider = sieve_.factorNumber(number);
-    if (divider == 1 || mpz_cmp(divider.get_mpz_t(), number.get_mpz_t()) == 0){
-      solve.emplace_back(number);
-    } else{
-      mpz_class anotherDivider;
-      mpz_div(anotherDivider.get_mpz_t(), number.get_mpz_t(), divider.get_mpz_t());
-      queue.push(divider);
-      queue.push(anotherDivider);
+    try {
+      const mpz_class divider = sieve_.factorNumber(number);
+      if (divider == 1 || mpz_cmp(divider.get_mpz_t(), number.get_mpz_t()) == 0) {
+        solve.emplace_back(number);
+      } else {
+        mpz_class anotherDivider;
+        mpz_div(anotherDivider.get_mpz_t(), number.get_mpz_t(), divider.get_mpz_t());
+        queue.push(divider);
+        queue.push(anotherDivider);
+      }
+    }
+    catch (std::invalid_argument &e){
+      std::cerr << e.what() << '\n';
+      solve.push_back(number);
+      break;
     }
   }
 

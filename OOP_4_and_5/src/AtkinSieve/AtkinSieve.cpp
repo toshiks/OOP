@@ -174,7 +174,7 @@ std::vector<long long>::const_iterator AtkinSieve::end() const {
   return this->primes_.end();
 }
 
-bool AtkinSieve::isPrime(const long long n) {
+bool AtkinSieve::isPrime(const long long& n) const{
   if (n >= this->is_prime_.size())
     throw std::invalid_argument("N more then size()");
 

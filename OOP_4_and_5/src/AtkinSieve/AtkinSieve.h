@@ -26,7 +26,7 @@ class AtkinSieve final {
 
   size_t size() const;
 
-  bool isPrime(const long long n);
+  bool isPrime(const long long& n) const;
 
   std::vector<long long>::const_iterator begin() const;
   std::vector<long long>::const_iterator end() const;
